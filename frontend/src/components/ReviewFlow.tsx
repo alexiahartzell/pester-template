@@ -1,5 +1,3 @@
-import type { Task } from "../api/tasks";
-
 interface ReviewItem {
   id: number;
   title: string;

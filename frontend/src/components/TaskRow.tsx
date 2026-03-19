@@ -58,7 +58,7 @@ export default function TaskRow({ task, onUpdate }: TaskRowProps) {
   const [editDue, setEditDue] = useState(task.due || "");
   const [editSource, setEditSource] = useState(task.source || "");
   const [editProject, setEditProject] = useState(task.project || "");
-  const [editPriority, setEditPriority] = useState(task.priority || "medium");
+  const [editPriority, setEditPriority] = useState<Task["priority"]>(task.priority || "medium");
   const [editNotes, setEditNotes] = useState(task.notes || "");
 
   const isDone = task.status === "done";
@@ -159,7 +159,7 @@ export default function TaskRow({ task, onUpdate }: TaskRowProps) {
               <label className="text-[11px] uppercase tracking-wide text-stone-500 block mb-1">Priority</label>
               <select
                 value={editPriority}
-                onChange={(e) => setEditPriority(e.target.value)}
+                onChange={(e) => setEditPriority(e.target.value as Task["priority"])}
                 className="w-full bg-stone-950 text-stone-200 px-3 py-2 rounded border border-stone-800 outline-none text-sm"
               >
                 <option value="low">Low</option>

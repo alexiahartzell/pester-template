@@ -35,3 +35,10 @@ from backend.routes.ai import router as ai_router
 
 app.include_router(tasks_router)
 app.include_router(ai_router)
+
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
+FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
+if FRONTEND_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
