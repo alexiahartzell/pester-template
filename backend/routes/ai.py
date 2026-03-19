@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from backend.db import get_db
 from backend.models import Task, TaskResponse, TaskStatus
 from backend.services.ai_planner import plan_day, process_inbox, reprioritize, generate_review
+from backend.services.slack import post_message, format_plan_message, format_review_message
 
 router = APIRouter(tags=["ai"])
 
@@ -63,6 +64,9 @@ def run_standup(db: Session = Depends(get_db)):
     }
     _save_plan(today_plan)
 
+    # Post to Slack
+    post_message(format_plan_message(today_plan))
+
     return {
         "inbox_suggestions": inbox_suggestions,
         "plan": today_plan,
@@ -93,6 +97,9 @@ def run_reprioritize(req: ReprioritizeRequest, db: Session = Depends(get_db)):
     }
     _save_plan(today_plan)
 
+    # Post to Slack
+    post_message("Plans reshuffled.\n" + format_plan_message(today_plan))
+
     return {"plan": today_plan}
 
 
@@ -109,6 +116,9 @@ def run_review(db: Session = Depends(get_db)):
         review_data = json.loads(raw)
     except json.JSONDecodeError:
         review_data = {"summary": raw, "completed": [], "uncompleted": []}
+
+    # Post to Slack
+    post_message(format_review_message(review_data))
 
     return review_data
 
