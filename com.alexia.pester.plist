@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.alexia.pester</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/alexia/anaconda3/bin/python</string>
+        <string>-m</string>
+        <string>uvicorn</string>
+        <string>backend.main:app</string>
+        <string>--port</string>
+        <string>8742</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/alexia/pester</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/alexia/.pester/pester.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/alexia/.pester/pester.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/alexia/anaconda3/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+</dict>
+</plist>
