@@ -29,7 +29,7 @@ def create_tables():
     conn = sqlite3.connect(str(DB_PATH))
     cursor = conn.execute("PRAGMA table_info(tasks)")
     columns = {row[1] for row in cursor.fetchall()}
-    for col in ["category", "deadline_type"]:
+    for col in ["category", "deadline_type", "start_time", "end_time", "recurrence", "difficulty"]:
         if col not in columns:
             conn.execute(f"ALTER TABLE tasks ADD COLUMN {col} VARCHAR")
     conn.commit()

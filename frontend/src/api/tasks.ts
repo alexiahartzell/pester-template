@@ -6,6 +6,10 @@ export interface Task {
   project: string | null;
   due: string | null;
   deadline_type: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  recurrence: string | null;
+  difficulty: string | null;
   priority: "high" | "medium" | "low";
   status: "inbox" | "active" | "done" | "dropped";
   task_type: string | null;

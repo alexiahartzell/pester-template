@@ -1,9 +1,9 @@
 import enum
-from datetime import date, datetime
+from datetime import date, datetime, time
 from typing import Optional
 
 from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, Date, DateTime, Enum, Text, JSON
+from sqlalchemy import Column, Integer, String, Date, Time, DateTime, Enum, Text, JSON
 from sqlalchemy.sql import func
 
 from backend.db import Base
@@ -30,6 +30,10 @@ class Task(Base):
     project = Column(String, nullable=True)
     due = Column(Date, nullable=True)
     deadline_type = Column(String, nullable=True)  # "hard" or "soft"
+    start_time = Column(Time, nullable=True)
+    end_time = Column(Time, nullable=True)
+    recurrence = Column(String, nullable=True)  # "weekly", "biweekly", etc.
+    difficulty = Column(String, nullable=True)  # "easy", "medium", "hard"
     priority = Column(Enum(TaskPriority), default=TaskPriority.medium)
     status = Column(Enum(TaskStatus), default=TaskStatus.inbox, nullable=False)
     task_type = Column(String, nullable=True)
@@ -47,6 +51,10 @@ class TaskCreate(BaseModel):
     project: Optional[str] = None
     due: Optional[date] = None
     deadline_type: Optional[str] = None
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
+    recurrence: Optional[str] = None
+    difficulty: Optional[str] = None
     priority: Optional[TaskPriority] = None
     status: TaskStatus = TaskStatus.inbox
     task_type: Optional[str] = None
@@ -60,6 +68,10 @@ class TaskUpdate(BaseModel):
     project: Optional[str] = None
     due: Optional[date] = None
     deadline_type: Optional[str] = None
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
+    recurrence: Optional[str] = None
+    difficulty: Optional[str] = None
     priority: Optional[TaskPriority] = None
     status: Optional[TaskStatus] = None
     task_type: Optional[str] = None
@@ -75,6 +87,10 @@ class TaskResponse(BaseModel):
 
     due: Optional[date]
     deadline_type: Optional[str]
+    start_time: Optional[time]
+    end_time: Optional[time]
+    recurrence: Optional[str]
+    difficulty: Optional[str]
     priority: TaskPriority
     status: TaskStatus
     task_type: Optional[str]

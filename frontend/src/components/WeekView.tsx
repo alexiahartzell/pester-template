@@ -4,19 +4,23 @@ import TaskRow from "./TaskRow";
 interface WeekViewProps {
   tasks: Task[];
   onUpdate: (id: number, data: Partial<Task>) => void;
+  onDelete?: (id: number) => void;
 }
 
-export default function WeekView({ tasks, onUpdate }: WeekViewProps) {
+export default function WeekView({ tasks, onUpdate, onDelete }: WeekViewProps) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const weekEnd = new Date(today);
-  weekEnd.setDate(weekEnd.getDate() + 7);
+  // Sun-Sat week
+  const weekStart = new Date(today);
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Sunday
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6); // Saturday
 
   const weekTasks = tasks
     .filter((t) => {
       if (t.status !== "active" || !t.due) return false;
       const d = new Date(t.due + "T00:00:00");
-      return d <= weekEnd;
+      return d >= weekStart && d <= weekEnd;
     })
     .sort((a, b) => (a.due! > b.due! ? 1 : -1));
 
@@ -34,7 +38,7 @@ export default function WeekView({ tasks, onUpdate }: WeekViewProps) {
         This week
       </div>
       {weekTasks.map((task) => (
-        <TaskRow key={task.id} task={task} onUpdate={onUpdate} />
+        <TaskRow key={task.id} task={task} onUpdate={onUpdate} onDelete={onDelete} />
       ))}
     </div>
   );

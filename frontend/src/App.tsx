@@ -55,6 +55,11 @@ export default function App() {
     refresh();
   };
 
+  const handleDelete = async (id: number) => {
+    await tasksApi.delete(id);
+    refresh();
+  };
+
   const handleProcessInbox = async () => {
     setLoadingProcess(true);
     try {
@@ -167,6 +172,10 @@ export default function App() {
                 priority: data.priority || "medium" as any,
                 due: data.due,
                 deadline_type: data.deadline_type,
+                difficulty: data.difficulty,
+                start_time: data.start_time,
+                end_time: data.end_time,
+                recurrence: data.recurrence,
                 status: "active",
               });
               await tasksApi.update(originalId, { status: "dropped" });
@@ -195,7 +204,9 @@ export default function App() {
       <TaskList
         tasks={allTasks}
         plan={plan.plan}
+        planDate={plan.date || null}
         onUpdate={handleUpdate}
+        onDelete={handleDelete}
       />
 
       {plan.note && (
@@ -209,16 +220,16 @@ export default function App() {
       />
 
       {activeView === "inbox" && (
-        <InboxView tasks={allTasks} onUpdate={handleUpdate} />
+        <InboxView tasks={allTasks} onUpdate={handleUpdate} onDelete={handleDelete} />
       )}
       {activeView === "this_week" && (
-        <WeekView tasks={allTasks} onUpdate={handleUpdate} />
+        <WeekView tasks={allTasks} onUpdate={handleUpdate} onDelete={handleDelete} />
       )}
       {activeView === "categories" && (
-        <CategoryView tasks={allTasks} onUpdate={handleUpdate} />
+        <CategoryView tasks={allTasks} onUpdate={handleUpdate} onDelete={handleDelete} />
       )}
       {activeView === "projects" && (
-        <ProjectsView tasks={allTasks} onUpdate={handleUpdate} />
+        <ProjectsView tasks={allTasks} onUpdate={handleUpdate} onDelete={handleDelete} />
       )}
 
       <RecentlyDone
@@ -229,7 +240,7 @@ export default function App() {
         }}
       />
 
-      <MonthlyCalendar tasks={allTasks} />
+      <MonthlyCalendar tasks={allTasks} onUpdate={handleUpdate} onDelete={handleDelete} />
 
       <WeeklyPieChart refreshKey={refreshKey} />
       <CompletionTracker refreshKey={refreshKey} />

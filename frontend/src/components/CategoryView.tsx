@@ -5,9 +5,10 @@ import { getCategoryColor } from "../categoryColors";
 interface CategoryViewProps {
   tasks: Task[];
   onUpdate: (id: number, data: Partial<Task>) => void;
+  onDelete?: (id: number) => void;
 }
 
-export default function CategoryView({ tasks, onUpdate }: CategoryViewProps) {
+export default function CategoryView({ tasks, onUpdate, onDelete }: CategoryViewProps) {
   const active = tasks.filter((t) => t.status === "active");
   const grouped = new Map<string, Task[]>();
 
@@ -34,7 +35,7 @@ export default function CategoryView({ tasks, onUpdate }: CategoryViewProps) {
             {cat}
           </div>
           {catTasks.map((task) => (
-            <TaskRow key={task.id} task={task} onUpdate={onUpdate} />
+            <TaskRow key={task.id} task={task} onUpdate={onUpdate} onDelete={onDelete} />
           ))}
         </div>
       ))}

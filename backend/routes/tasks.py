@@ -11,6 +11,21 @@ from backend.models import Task, TaskCreate, TaskUpdate, TaskResponse, TaskStatu
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
+def _next_recurrence_date(current_due: date, recurrence: str) -> date:
+    if recurrence == "daily":
+        return current_due + timedelta(days=1)
+    elif recurrence == "weekly":
+        return current_due + timedelta(weeks=1)
+    elif recurrence == "biweekly":
+        return current_due + timedelta(weeks=2)
+    elif recurrence == "monthly":
+        month = current_due.month % 12 + 1
+        year = current_due.year + (1 if month == 1 else 0)
+        day = min(current_due.day, 28)
+        return current_due.replace(year=year, month=month, day=day)
+    return current_due + timedelta(weeks=1)
+
+
 @router.get("", response_model=list[TaskResponse])
 def list_tasks(
     status: Optional[TaskStatus] = None,
@@ -58,6 +73,28 @@ def update_task(task_id: int, updates: TaskUpdate, db: Session = Depends(get_db)
         setattr(task, key, value)
     db.commit()
     db.refresh(task)
+
+    # Auto-create next instance for recurring tasks
+    if task.status == TaskStatus.done and task.recurrence and task.due:
+        next_due = _next_recurrence_date(task.due, task.recurrence)
+        next_task = Task(
+            title=task.title,
+            project=task.project,
+            due=next_due,
+            deadline_type=task.deadline_type,
+            start_time=task.start_time,
+            end_time=task.end_time,
+            recurrence=task.recurrence,
+            priority=task.priority,
+            status=TaskStatus.active,
+            task_type=task.task_type,
+            category=task.category,
+            tags=task.tags,
+            notes=task.notes,
+        )
+        db.add(next_task)
+        db.commit()
+
     return task
 
 
@@ -73,11 +110,14 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
 @router.get("/stats")
 def get_stats(db: Session = Depends(get_db)):
     today = date.today()
-    week_end = today + timedelta(days=7)
+    # Sun-Sat week
+    week_start = today - timedelta(days=today.weekday() + 1 if today.weekday() != 6 else 0)
+    week_end = week_start + timedelta(days=6)
     inbox_count = db.query(func.count(Task.id)).filter(Task.status == TaskStatus.inbox).scalar()
     week_count = db.query(func.count(Task.id)).filter(
         Task.status == TaskStatus.active,
         Task.due != None,
+        Task.due >= week_start,
         Task.due <= week_end,
     ).scalar()
     overdue_count = db.query(func.count(Task.id)).filter(
@@ -161,15 +201,17 @@ def get_completion(weeks: int = Query(default=4, ge=1, le=52), db: Session = Dep
 
 @router.get("/distribution")
 def get_distribution(db: Session = Depends(get_db)):
-    """Task counts by category for the current week (Mon-Sun)."""
+    """Task counts by category for the current Sun-Sat week."""
     today = date.today()
-    week_start = today - timedelta(days=today.weekday())
+    week_start = today - timedelta(days=today.weekday() + 1 if today.weekday() != 6 else 0)
+    week_end = week_start + timedelta(days=6)
 
-    # Active + done this week
+    # Active + done tasks due this week
     tasks = db.query(Task).filter(
         Task.status.in_([TaskStatus.active, TaskStatus.done]),
-        Task.created_at != None,
-        func.date(Task.created_at) >= week_start,
+        Task.due != None,
+        Task.due >= week_start,
+        Task.due <= week_end,
     ).all()
 
     from collections import Counter

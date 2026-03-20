@@ -11,6 +11,10 @@ export interface InboxSuggestion {
   suggested_priority: string | null;
   suggested_due: string | null;
   suggested_deadline_type: string | null;
+  suggested_difficulty: string | null;
+  suggested_start_time: string | null;
+  suggested_end_time: string | null;
+  suggested_recurrence: string | null;
   reasoning: string;
   needs_clarification?: boolean;
   clarification_prompt?: string | null;
@@ -22,6 +26,10 @@ interface Edits {
   priority?: string;
   due?: string;
   deadline_type?: string;
+  difficulty?: string;
+  start_time?: string;
+  end_time?: string;
+  recurrence?: string;
   project?: string;
 }
 
@@ -56,11 +64,17 @@ export default function StandupFlow({ suggestions, onAccept, onDismiss }: Standu
         const priority = e.priority ?? s.suggested_priority ?? "medium";
         const due = e.due ?? s.suggested_due ?? "";
         const deadlineType = e.deadline_type ?? s.suggested_deadline_type ?? "";
+        const difficulty = e.difficulty ?? s.suggested_difficulty ?? "";
+        const startTime = e.start_time ?? s.suggested_start_time ?? "";
+        const endTime = e.end_time ?? s.suggested_end_time ?? "";
+        const recurrence = e.recurrence ?? s.suggested_recurrence ?? "";
         const project = e.project ?? s.suggested_project ?? "";
 
         return (
           <div key={s.original_id} className="border-b border-border last:border-0 py-5">
-            <div className="text-sm text-subtle mb-1">{s.original_title}</div>
+            {s.original_title.toLowerCase() !== s.suggested_title.toLowerCase() && (
+              <div className="text-sm text-muted line-through mb-1">{s.original_title}</div>
+            )}
             <div className="text-muted text-sm mb-3">{s.reasoning}</div>
 
             {s.needs_clarification && s.clarification_prompt && (
@@ -124,6 +138,50 @@ export default function StandupFlow({ suggestions, onAccept, onDismiss }: Standu
                 </select>
               </div>
               <div>
+                <label className="text-xs uppercase tracking-wide text-muted block mb-1.5">Difficulty</label>
+                <select
+                  value={difficulty}
+                  onChange={(ev) => setEdit(s.original_id, { difficulty: ev.target.value })}
+                  className="w-full bg-bg text-text px-4 py-2.5 rounded-lg border border-border outline-none text-sm"
+                >
+                  <option value="">None</option>
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-wide text-muted block mb-1.5">Start</label>
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(ev) => setEdit(s.original_id, { start_time: ev.target.value })}
+                  className="w-full bg-bg text-text px-4 py-2.5 rounded-lg border border-border outline-none text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-wide text-muted block mb-1.5">End</label>
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={(ev) => setEdit(s.original_id, { end_time: ev.target.value })}
+                  className="w-full bg-bg text-text px-4 py-2.5 rounded-lg border border-border outline-none text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-wide text-muted block mb-1.5">Recurrence</label>
+                <select
+                  value={recurrence}
+                  onChange={(ev) => setEdit(s.original_id, { recurrence: ev.target.value })}
+                  className="w-full bg-bg text-text px-4 py-2.5 rounded-lg border border-border outline-none text-sm"
+                >
+                  <option value="">None</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="biweekly">Biweekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+              <div>
                 <label className="text-xs uppercase tracking-wide text-muted block mb-1.5">Project</label>
                 <input
                   type="text"
@@ -144,6 +202,10 @@ export default function StandupFlow({ suggestions, onAccept, onDismiss }: Standu
                   priority: (priority || "medium") as any,
                   due: due || null,
                   deadline_type: deadlineType || null,
+                  difficulty: difficulty || null,
+                  start_time: startTime || null,
+                  end_time: endTime || null,
+                  recurrence: recurrence || null,
                 });
               }}
               className="text-sm px-4 py-2 bg-surface-hover text-text rounded-lg hover:bg-border transition-colors"
