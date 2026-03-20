@@ -13,14 +13,15 @@ mkdir -p "$DATA_DIR"
 if [ ! -f "$DATA_DIR/config.yaml" ]; then
     cat > "$DATA_DIR/config.yaml" << 'EOF'
 # pester configuration
-anthropic_api_key: ""
+# Ollama must be running locally on port 11434
+ollama_model: "llama3.1:8b"
 slack_webhook_url: ""
 morning_nudge_time: "09:00"
 evening_review_time: "17:30"
 server_port: 8742
 EOF
     echo "Created default config at $DATA_DIR/config.yaml"
-    echo "  -> Set your anthropic_api_key to enable AI features"
+    echo "  -> Make sure Ollama is running (ollama serve)"
     echo "  -> Set your slack_webhook_url to enable Slack notifications"
 fi
 
@@ -42,4 +43,5 @@ launchctl load "$AGENTS_DIR/$PLIST_NAME"
 echo ""
 echo "pester is installed and running."
 echo "  -> Open http://localhost:8742 in your browser"
-echo "  -> Edit $DATA_DIR/config.yaml to configure API keys"
+echo "  -> Make sure Ollama is running with: ollama serve"
+echo "  -> Edit $DATA_DIR/config.yaml to configure settings"

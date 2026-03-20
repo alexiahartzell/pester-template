@@ -38,7 +38,14 @@ def run_standup(db: Session = Depends(get_db)):
         inbox_schemas = [TaskResponse.model_validate(t) for t in inbox_tasks]
         raw = process_inbox(inbox_schemas)
         try:
-            inbox_suggestions = json.loads(raw)
+            parsed = json.loads(raw)
+            # Ollama wraps arrays in an object — extract the array
+            if isinstance(parsed, dict) and "tasks" in parsed:
+                inbox_suggestions = parsed["tasks"]
+            elif isinstance(parsed, list):
+                inbox_suggestions = parsed
+            else:
+                inbox_suggestions = parsed
         except json.JSONDecodeError:
             inbox_suggestions = raw
 

@@ -6,10 +6,10 @@ AI-powered daily task manager. Captures tasks fast, lets the AI sort out your da
 
 1. Clone this repo to `~/pester`
 2. Run `bash scripts/install.sh`
-3. Edit `~/.pester/config.yaml`:
-   - Set `anthropic_api_key` for AI features
+3. Make sure Ollama is running (`ollama serve`) with the model pulled (`ollama pull llama3.1:8b`)
+4. Edit `~/.pester/config.yaml`:
    - Set `slack_webhook_url` for Slack notifications
-4. Open `http://localhost:8742`
+5. Open `http://localhost:8742`
 
 ## Usage
 
