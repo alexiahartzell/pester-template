@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from backend.db import get_db
 from backend.models import Task, TaskResponse, TaskStatus
 from backend.services.ai_planner import plan_day, process_inbox, reprioritize, generate_review
+from backend.services.scheduler import _mark_sent, record_end, get_today_hours
 from backend.services.slack import post_message, format_plan_message, format_review_message
 
 router = APIRouter(tags=["ai"])
@@ -50,29 +51,37 @@ def run_standup(db: Session = Depends(get_db)):
             inbox_suggestions = raw
 
     active_tasks = db.query(Task).filter(Task.status == TaskStatus.active).all()
-    active_schemas = [TaskResponse.model_validate(t) for t in active_tasks]
     today = date.today()
-    done_today = db.query(Task).filter(
-        Task.status == TaskStatus.done,
-        func.date(Task.completed_at) == today,
-    ).count()
 
-    raw_plan = plan_day(active_schemas, done_today)
-    try:
-        plan_data = json.loads(raw_plan)
-    except json.JSONDecodeError:
-        plan_data = {"plan": [], "deferred": [], "note": raw_plan}
+    if active_tasks:
+        active_schemas = [TaskResponse.model_validate(t) for t in active_tasks]
+        done_today = db.query(Task).filter(
+            Task.status == TaskStatus.done,
+            func.date(Task.completed_at) == today,
+        ).count()
 
-    today_plan = {
-        "date": date.today().isoformat(),
-        "plan": plan_data.get("plan", []),
-        "deferred": plan_data.get("deferred", []),
-        "note": plan_data.get("note"),
-    }
-    _save_plan(today_plan)
+        raw_plan = plan_day(active_schemas, done_today)
+        try:
+            plan_data = json.loads(raw_plan)
+        except json.JSONDecodeError:
+            plan_data = {"plan": [], "deferred": [], "note": raw_plan}
 
-    # Post to Slack
-    post_message(format_plan_message(today_plan))
+        today_plan = {
+            "date": today.isoformat(),
+            "plan": plan_data.get("plan", []),
+            "deferred": plan_data.get("deferred", []),
+            "note": plan_data.get("note"),
+        }
+        _save_plan(today_plan)
+        post_message(format_plan_message(today_plan))
+    else:
+        today_plan = {
+            "date": today.isoformat(),
+            "plan": [],
+            "deferred": [],
+            "note": None,
+        }
+        _save_plan(today_plan)
 
     return {
         "inbox_suggestions": inbox_suggestions,
@@ -124,10 +133,22 @@ def run_review(db: Session = Depends(get_db)):
     except json.JSONDecodeError:
         review_data = {"summary": raw, "completed": [], "uncompleted": []}
 
-    # Post to Slack
-    post_message(format_review_message(review_data))
+    # Record work end time and compute hours
+    hours_data = record_end()
 
-    return review_data
+    # Post to Slack
+    hours_msg = ""
+    if hours_data.get("hours"):
+        hours_msg = f"\n*Hours worked:* {hours_data['hours']}h"
+    post_message(format_review_message(review_data) + hours_msg)
+    _mark_sent("review")
+
+    return {**review_data, "hours": hours_data}
+
+
+@router.get("/hours/today")
+def get_hours():
+    return get_today_hours()
 
 
 @router.get("/plan/today")

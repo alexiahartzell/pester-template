@@ -22,15 +22,15 @@ export default function WeekView({ tasks, onUpdate }: WeekViewProps) {
 
   if (weekTasks.length === 0) {
     return (
-      <div className="text-stone-500 text-sm py-4 text-center">
+      <div className="text-muted text-base py-6 text-center">
         Nothing due this week.
       </div>
     );
   }
 
   return (
-    <div className="mt-4">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-3">
+    <div className="mt-5">
+      <div className="text-xs font-semibold uppercase tracking-wider text-subtle mb-4">
         This week
       </div>
       {weekTasks.map((task) => (

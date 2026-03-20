@@ -11,16 +11,16 @@ export default function InboxView({ tasks, onUpdate }: InboxViewProps) {
 
   if (inbox.length === 0) {
     return (
-      <div className="text-stone-500 text-sm py-4 text-center">
+      <div className="text-muted text-base py-6 text-center">
         Inbox is empty.
       </div>
     );
   }
 
   return (
-    <div className="mt-4">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-3">
-        Inbox
+    <div className="mt-5">
+      <div className="text-xs font-semibold uppercase tracking-wider text-subtle mb-4">
+        New
       </div>
       {inbox.map((task) => (
         <TaskRow key={task.id} task={task} onUpdate={onUpdate} />

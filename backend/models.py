@@ -30,9 +30,11 @@ class Task(Base):
     project = Column(String, nullable=True)
     source = Column(String, nullable=True)
     due = Column(Date, nullable=True)
+    deadline_type = Column(String, nullable=True)  # "hard" or "soft"
     priority = Column(Enum(TaskPriority), default=TaskPriority.medium)
     status = Column(Enum(TaskStatus), default=TaskStatus.inbox, nullable=False)
     task_type = Column(String, nullable=True)
+    category = Column(String, nullable=True)
     tags = Column(JSON, default=list)
     created_at = Column(DateTime, server_default=func.now())
     completed_at = Column(DateTime, nullable=True)
@@ -46,9 +48,11 @@ class TaskCreate(BaseModel):
     project: Optional[str] = None
     source: Optional[str] = None
     due: Optional[date] = None
+    deadline_type: Optional[str] = None
     priority: Optional[TaskPriority] = None
     status: TaskStatus = TaskStatus.inbox
     task_type: Optional[str] = None
+    category: Optional[str] = None
     tags: list[str] = []
     notes: Optional[str] = None
 
@@ -58,9 +62,11 @@ class TaskUpdate(BaseModel):
     project: Optional[str] = None
     source: Optional[str] = None
     due: Optional[date] = None
+    deadline_type: Optional[str] = None
     priority: Optional[TaskPriority] = None
     status: Optional[TaskStatus] = None
     task_type: Optional[str] = None
+    category: Optional[str] = None
     tags: Optional[list[str]] = None
     notes: Optional[str] = None
 
@@ -71,9 +77,11 @@ class TaskResponse(BaseModel):
     project: Optional[str]
     source: Optional[str]
     due: Optional[date]
+    deadline_type: Optional[str]
     priority: TaskPriority
     status: TaskStatus
     task_type: Optional[str]
+    category: Optional[str]
     tags: list[str]
     created_at: datetime
     completed_at: Optional[datetime]

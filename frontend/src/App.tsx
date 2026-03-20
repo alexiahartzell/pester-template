@@ -1,34 +1,42 @@
 import { useEffect, useState, useCallback } from "react";
-import { tasks as tasksApi, ai, type Task, type Stats, type DayPlan } from "./api/tasks";
+import { tasks as tasksApi, ai, type Task, type Stats, type DayPlan, type HoursData } from "./api/tasks";
 import CaptureBar from "./components/CaptureBar";
 import TaskList from "./components/TaskList";
 import SummaryCards from "./components/SummaryCards";
 import InboxView from "./components/InboxView";
 import WeekView from "./components/WeekView";
 import ProjectsView from "./components/ProjectsView";
+import CategoryView from "./components/CategoryView";
 import PlansChanged from "./components/PlansChanged";
 import StandupFlow from "./components/StandupFlow";
 import ReviewFlow from "./components/ReviewFlow";
+import CompletionTracker from "./components/CompletionTracker";
+import WeeklyPieChart from "./components/WeeklyPieChart";
 
 export default function App() {
   const [allTasks, setAllTasks] = useState<Task[]>([]);
-  const [stats, setStats] = useState<Stats>({ inbox: 0, this_week: 0, overdue: 0, done_today: 0, projects: 0 });
+  const [stats, setStats] = useState<Stats>({ inbox: 0, this_week: 0, overdue: 0, done_today: 0, projects: 0, categories: 0 });
   const [plan, setPlan] = useState<DayPlan>({ date: "", plan: [], deferred: [], note: null });
   const [activeView, setActiveView] = useState<string | null>(null);
   const [showPlansChanged, setShowPlansChanged] = useState(false);
   const [reprioritizing, setReprioritizing] = useState(false);
   const [standupSuggestions, setStandupSuggestions] = useState<any[] | null>(null);
   const [reviewData, setReviewData] = useState<any | null>(null);
+  const [loadingStandup, setLoadingStandup] = useState(false);
+  const [loadingReview, setLoadingReview] = useState(false);
+  const [hours, setHours] = useState<HoursData | null>(null);
 
   const refresh = useCallback(async () => {
-    const [taskList, statsData, planData] = await Promise.all([
+    const [taskList, statsData, planData, hoursData] = await Promise.all([
       tasksApi.list(),
       tasksApi.stats(),
       ai.todayPlan(),
+      ai.hours(),
     ]);
     setAllTasks(taskList);
     setStats(statsData);
     setPlan(planData);
+    setHours(hoursData);
   }, []);
 
   useEffect(() => {
@@ -46,11 +54,16 @@ export default function App() {
   };
 
   const handleRunStandup = async () => {
-    const result = await ai.standup();
-    if (result.inbox_suggestions && Array.isArray(result.inbox_suggestions)) {
-      setStandupSuggestions(result.inbox_suggestions);
+    setLoadingStandup(true);
+    try {
+      const result = await ai.standup();
+      if (result.inbox_suggestions && Array.isArray(result.inbox_suggestions)) {
+        setStandupSuggestions(result.inbox_suggestions);
+      }
+      refresh();
+    } finally {
+      setLoadingStandup(false);
     }
-    refresh();
   };
 
   const handleReprioritize = async (context: string) => {
@@ -65,8 +78,13 @@ export default function App() {
   };
 
   const handleRunReview = async () => {
-    const result = await ai.review();
-    setReviewData(result);
+    setLoadingReview(true);
+    try {
+      const result = await ai.review();
+      setReviewData(result);
+    } finally {
+      setLoadingReview(false);
+    }
   };
 
   const handleReviewAction = async (id: number, action: "tomorrow" | "drop" | "done") => {
@@ -86,30 +104,50 @@ export default function App() {
     setActiveView(activeView === view ? null : view);
   };
 
+  const formatHours = (h: number) => {
+    const hrs = Math.floor(h);
+    const mins = Math.round((h - hrs) * 60);
+    if (hrs === 0) return `${mins}m`;
+    if (mins === 0) return `${hrs}h`;
+    return `${hrs}h ${mins}m`;
+  };
+
   return (
-    <div className="max-w-3xl mx-auto px-6 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-stone-400 text-sm font-semibold uppercase tracking-wider">
-          pester
-        </h1>
-        <div className="flex gap-2">
+    <div className="max-w-2xl mx-auto px-6 py-10">
+      <div className="flex items-center justify-between mb-10">
+        <div>
+          <h1 className="text-subtle text-base font-semibold tracking-wide">
+            pester
+          </h1>
+          {hours && hours.started && (
+            <div className="text-xs text-muted mt-1">
+              {formatHours(hours.today_hours)} today &middot; {formatHours(hours.week_hours)} this week
+              {hours.avg_hours_per_week != null && (
+                <> &middot; avg {formatHours(hours.avg_hours_per_week)}/wk</>
+              )}
+            </div>
+          )}
+        </div>
+        <div className="flex gap-3">
           <button
             onClick={handleRunStandup}
-            className="text-xs px-3 py-1.5 text-stone-500 rounded hover:text-stone-300 hover:bg-stone-900 transition-colors"
+            disabled={loadingStandup}
+            className="text-sm px-4 py-2 bg-surface border border-border text-text rounded-lg hover:bg-surface-hover transition-colors disabled:opacity-50"
           >
-            Standup
+            {loadingStandup ? "Running..." : "Plan my day"}
           </button>
           <button
             onClick={() => setShowPlansChanged(true)}
-            className="text-xs px-3 py-1.5 bg-stone-900 border border-stone-700 text-stone-300 rounded hover:bg-stone-800 transition-colors"
+            className="text-sm px-4 py-2 bg-surface border border-border text-text rounded-lg hover:bg-surface-hover transition-colors"
           >
-            Plans changed
+            Reshuffle
           </button>
           <button
             onClick={handleRunReview}
-            className="text-xs px-3 py-1.5 text-stone-500 rounded hover:text-stone-300 hover:bg-stone-900 transition-colors"
+            disabled={loadingReview}
+            className="text-sm px-4 py-2 bg-surface border border-border text-text rounded-lg hover:bg-surface-hover transition-colors disabled:opacity-50"
           >
-            Review
+            {loadingReview ? "Running..." : "Wrap up"}
           </button>
         </div>
       </div>
@@ -143,7 +181,7 @@ export default function App() {
       />
 
       {plan.note && (
-        <div className="text-stone-500 text-sm italic mb-6 px-1">{plan.note}</div>
+        <div className="text-muted text-sm italic mb-8 px-1">{plan.note}</div>
       )}
 
       <SummaryCards
@@ -158,9 +196,15 @@ export default function App() {
       {activeView === "this_week" && (
         <WeekView tasks={allTasks} onUpdate={handleUpdate} />
       )}
+      {activeView === "categories" && (
+        <CategoryView tasks={allTasks} onUpdate={handleUpdate} />
+      )}
       {activeView === "projects" && (
         <ProjectsView tasks={allTasks} onUpdate={handleUpdate} />
       )}
+
+      <WeeklyPieChart />
+      <CompletionTracker />
 
       {showPlansChanged && (
         <PlansChanged

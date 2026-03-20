@@ -1,19 +1,31 @@
 @import "tailwindcss";
 
 @theme {
-  --color-stone-950: #1c1917;
-  --color-stone-900: #292524;
-  --color-stone-800: #44403c;
-  --color-stone-500: #78716c;
-  --color-stone-400: #a8a29e;
-  --color-stone-200: #e7e5e4;
-  --color-urgent: #ef4444;
-  --color-quick: #10b981;
-  --color-deep: #f59e0b;
-  --color-reading: #8b5cf6;
+  --color-bg: #121215;
+  --color-surface: #1e1e22;
+  --color-surface-hover: #27272b;
+  --color-border: #2e2e33;
+  --color-muted: #8888a0;
+  --color-subtle: #b0b0c0;
+  --color-text: #ededf0;
+  --color-urgent: #ff6b6b;
+  --color-done: #5eeaa0;
+  --color-warm: #ff9966;
+  --color-cat-my-research: #5eaaee;
+  --color-cat-group-research: #3578c4;
+  --color-cat-my-code: #b98eff;
+  --color-cat-group-code: #8b5ecf;
+  --color-cat-my-admin: #ffcc44;
+  --color-cat-group-admin: #d4a520;
+  --color-cat-coursework: #5ee8c0;
+  --color-cat-mentoring: #f078b0;
+  --color-cat-my-meetings: #ee8855;
+  --color-cat-group-meetings: #cc6633;
+  --color-cat-default: #b0b0c0;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 body {
-  @apply bg-stone-950 text-stone-200 font-sans antialiased;
+  @apply bg-bg text-text font-sans antialiased;
+  font-size: 17px;
 }

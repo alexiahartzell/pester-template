@@ -6,7 +6,7 @@ from backend.config import get_config_value
 from backend.models import TaskResponse
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
-DEFAULT_MODEL = "llama3.1:8b"
+DEFAULT_MODEL = "llama3.2:3b"
 
 
 def _chat(system: str, user: str) -> str:
@@ -21,8 +21,9 @@ def _chat(system: str, user: str) -> str:
                 {"role": "user", "content": user},
             ],
             "stream": False,
-            "options": {"temperature": 0.3},
+            "options": {"temperature": 0.3, "num_ctx": 2048},
             "format": "json",
+            "keep_alive": "5m",
         },
         timeout=120,
     )
@@ -35,7 +36,10 @@ def _tasks_to_context(tasks: list[TaskResponse]) -> str:
     for t in tasks:
         parts = [f"[{t.id}] {t.title}"]
         if t.due:
-            parts.append(f"due:{t.due}")
+            dl = f"due:{t.due}"
+            if t.deadline_type:
+                dl += f"({t.deadline_type})"
+            parts.append(dl)
         if t.priority:
             parts.append(f"priority:{t.priority.value}")
         if t.source:
@@ -50,20 +54,43 @@ def _tasks_to_context(tasks: list[TaskResponse]) -> str:
     return "\n".join(lines)
 
 
+CATEGORIES = [
+    "my research", "group research",
+    "my code", "group code",
+    "my admin", "group admin",
+    "my meetings", "group meetings",
+    "coursework", "mentoring",
+]
+
+
 def process_inbox(inbox_tasks: list[TaskResponse]) -> str:
     task_text = _tasks_to_context(inbox_tasks)
 
     return _chat(
         system=(
             "You are a task management assistant for a computational physics grad student. "
-            "Categorize each inbox task: infer project, source, task_type (quick/deep work/reading), "
-            "and suggest a priority and deadline if obvious. "
-            "Respond with a JSON object with key 'tasks' containing an array of objects, each with: "
-            "id, title, suggested_project, suggested_source, suggested_task_type, suggested_priority (high/medium/low), "
-            "suggested_due (YYYY-MM-DD or null), reasoning (one sentence). "
+            "For each inbox task:\n"
+            "1. Assign a category from this list: " + ", ".join(CATEGORIES) + ".\n"
+            "2. Infer project, source, and suggest priority (high/medium/low) and due date if obvious. "
+            "If you suggest a due date, also specify deadline_type as 'hard' (immovable — submission, "
+            "presentation, meeting) or 'soft' (aspirational — self-imposed, flexible). "
+            "If there's no due date, ask the user if there's a deadline and whether it's hard or soft.\n"
+            "3. Check granularity: each task should be roughly 1-2 hours of concrete work. "
+            "If a task is too vague or too broad (e.g. 'read all the papers', 'converge these models', "
+            "'finish the project', 'work on research'), set 'needs_clarification' to true and write a "
+            "'clarification_prompt' — a short question asking the user to be more specific about what "
+            "exactly they need to do. For example: 'Which papers? How many?' or 'Which models and what convergence criteria?'. "
+            "Do NOT guess subtasks. Just ask. "
+            "If the task is already concrete and reasonably scoped, leave needs_clarification as false.\n\n"
+            "Respond with a JSON object with key 'tasks' containing an array. Each object has: "
+            "id, title, suggested_category, suggested_project, suggested_source, "
+            "suggested_priority (high/medium/low), suggested_due (YYYY-MM-DD or null), "
+            "suggested_deadline_type ('hard', 'soft', or null), "
+            "reasoning (one sentence), needs_clarification (boolean), "
+            "clarification_prompt (string or null — include deadline questions here if no due date). "
             "Only return JSON."
         ),
-        user=f"Categorize these inbox tasks:\n{task_text}",
+        user=f"Categorize and check granularity of these inbox tasks:\n{task_text}",
     )
 
 
@@ -75,9 +102,8 @@ def plan_day(active_tasks: list[TaskResponse], done_today_count: int) -> str:
         system=(
             "You are a task management assistant for a computational physics grad student. "
             "Generate a prioritized daily checklist from the active tasks. Rules:\n"
-            "- Tasks due today or overdue go first.\n"
+            "- Hard deadline tasks due today or overdue go first, then soft deadline tasks.\n"
             "- Mix in 1-2 quick wins early for momentum if the day is heavy.\n"
-            "- If no reading has been done recently, suggest a reading block.\n"
             "- Flag if there are too many tasks and suggest what to defer.\n"
             "- Respond with a JSON object: {plan: [{id, title, reason}], deferred: [{id, title, reason}], note: string|null}. "
             "The plan array is the ordered checklist. Only return JSON."

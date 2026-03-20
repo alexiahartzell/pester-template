@@ -22,15 +22,15 @@ export default function TaskList({ tasks, plan, onUpdate }: TaskListProps) {
 
   if (ordered.length === 0) {
     return (
-      <div className="text-stone-500 text-sm py-8 text-center">
-        No tasks for today. Run standup to generate a plan, or capture something above.
+      <div className="text-muted text-base py-12 text-center">
+        No tasks for today. Hit "Plan my day" or capture something above.
       </div>
     );
   }
 
   return (
-    <div className="mb-8">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-3">
+    <div className="mb-10">
+      <div className="text-xs font-semibold uppercase tracking-wider text-subtle mb-4">
         Today
       </div>
       {ordered.map((task) => (

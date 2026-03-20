@@ -6,9 +6,11 @@ export interface Task {
   project: string | null;
   source: string | null;
   due: string | null;
+  deadline_type: string | null;
   priority: "high" | "medium" | "low";
   status: "inbox" | "active" | "done" | "dropped";
   task_type: string | null;
+  category: string | null;
   tags: string[];
   created_at: string;
   completed_at: string | null;
@@ -21,6 +23,7 @@ export interface Stats {
   overdue: number;
   done_today: number;
   projects: number;
+  categories: number;
 }
 
 export interface PlanItem {
@@ -34,6 +37,33 @@ export interface DayPlan {
   plan: PlanItem[];
   deferred: PlanItem[];
   note: string | null;
+}
+
+export interface WeekBucket {
+  week: string;
+  done: number;
+  total: number;
+  pct: number;
+}
+
+export interface CompletionData {
+  categories: Record<string, WeekBucket[]>;
+  overall: WeekBucket[];
+  total_pct: number;
+  total_done: number;
+  total_resolved: number;
+}
+
+export interface DistributionSlice {
+  category: string;
+  count: number;
+  pct: number;
+}
+
+export interface DistributionData {
+  week_start: string;
+  total: number;
+  slices: DistributionSlice[];
 }
 
 export const tasks = {
@@ -54,7 +84,23 @@ export const tasks = {
   delete: (id: number) =>
     apiFetch<void>(`/tasks/${id}`, { method: "DELETE" }),
   stats: () => apiFetch<Stats>("/tasks/stats"),
+  completion: (weeks = 4) => apiFetch<CompletionData>(`/tasks/completion?weeks=${weeks}`),
+  distribution: () => apiFetch<DistributionData>("/tasks/distribution"),
+  createFull: (data: Partial<Task>) =>
+    apiFetch<Task>("/tasks", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
+
+export interface HoursData {
+  date: string;
+  today_hours: number;
+  week_hours: number;
+  avg_hours_per_week: number | null;
+  started: boolean;
+  reviewed: boolean;
+}
 
 export const ai = {
   standup: () => apiFetch<any>("/standup", { method: "POST" }),
@@ -65,4 +111,5 @@ export const ai = {
     }),
   review: () => apiFetch<any>("/review", { method: "POST" }),
   todayPlan: () => apiFetch<DayPlan>("/plan/today"),
+  hours: () => apiFetch<HoursData>("/hours/today"),
 };

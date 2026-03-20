@@ -16,15 +16,15 @@ export default function CaptureBar({ onCapture }: CaptureBarProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-8">
+    <form onSubmit={handleSubmit} className="mb-10">
       <input
         type="text"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Add a task..."
-        className="w-full bg-stone-900 text-stone-200 placeholder-stone-500
-                   px-4 py-3.5 rounded-lg border border-stone-800
-                   outline-none focus:border-stone-500 transition-colors"
+        className="w-full bg-surface text-text placeholder-muted
+                   px-5 py-4 rounded-xl border border-border text-base
+                   outline-none focus:border-subtle transition-colors"
       />
     </form>
   );

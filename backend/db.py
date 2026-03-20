@@ -24,3 +24,13 @@ def get_db():
 
 def create_tables():
     Base.metadata.create_all(bind=engine)
+    # Add columns that may be missing from older DBs
+    import sqlite3
+    conn = sqlite3.connect(str(DB_PATH))
+    cursor = conn.execute("PRAGMA table_info(tasks)")
+    columns = {row[1] for row in cursor.fetchall()}
+    for col in ["category", "deadline_type"]:
+        if col not in columns:
+            conn.execute(f"ALTER TABLE tasks ADD COLUMN {col} VARCHAR")
+    conn.commit()
+    conn.close()

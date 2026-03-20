@@ -1,20 +1,21 @@
 import type { Task } from "../api/tasks";
 import TaskRow from "./TaskRow";
+import { getCategoryColor } from "../categoryColors";
 
-interface ProjectsViewProps {
+interface CategoryViewProps {
   tasks: Task[];
   onUpdate: (id: number, data: Partial<Task>) => void;
 }
 
-export default function ProjectsView({ tasks, onUpdate }: ProjectsViewProps) {
+export default function CategoryView({ tasks, onUpdate }: CategoryViewProps) {
   const active = tasks.filter((t) => t.status === "active");
   const grouped = new Map<string, Task[]>();
 
   for (const task of active) {
-    const project = task.project || "No project";
-    const list = grouped.get(project) || [];
+    const cat = task.category || "uncategorized";
+    const list = grouped.get(cat) || [];
     list.push(task);
-    grouped.set(project, list);
+    grouped.set(cat, list);
   }
 
   if (grouped.size === 0) {
@@ -27,12 +28,12 @@ export default function ProjectsView({ tasks, onUpdate }: ProjectsViewProps) {
 
   return (
     <div className="mt-5">
-      {Array.from(grouped.entries()).map(([project, projectTasks]) => (
-        <div key={project} className="mb-8">
-          <div className="text-xs font-semibold uppercase tracking-wider text-subtle mb-4">
-            {project}
+      {Array.from(grouped.entries()).map(([cat, catTasks]) => (
+        <div key={cat} className="mb-8">
+          <div className={`text-xs font-semibold uppercase tracking-wider ${getCategoryColor(cat)} mb-4`}>
+            {cat}
           </div>
-          {projectTasks.map((task) => (
+          {catTasks.map((task) => (
             <TaskRow key={task.id} task={task} onUpdate={onUpdate} />
           ))}
         </div>

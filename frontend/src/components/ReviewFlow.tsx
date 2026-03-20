@@ -21,17 +21,17 @@ export default function ReviewFlow({
   onDismiss,
 }: ReviewFlowProps) {
   return (
-    <div className="mb-8 bg-stone-900 rounded-lg border border-stone-800 p-5">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-3">
+    <div className="mb-10 bg-surface rounded-xl border border-border p-6">
+      <div className="text-xs font-semibold uppercase tracking-wider text-subtle mb-3">
         Evening review
       </div>
-      {summary && <p className="text-stone-400 text-sm mb-4">{summary}</p>}
+      {summary && <p className="text-subtle text-sm mb-5">{summary}</p>}
 
       {completed.length > 0 && (
-        <div className="mb-4">
-          <div className="text-[11px] uppercase tracking-wide text-quick mb-2">Done</div>
+        <div className="mb-5">
+          <div className="text-xs uppercase tracking-wide text-done mb-2">Done</div>
           {completed.map((t) => (
-            <div key={t.id} className="text-sm text-stone-400 py-1">
+            <div key={t.id} className="text-sm text-subtle py-1.5">
               {t.title}
             </div>
           ))}
@@ -39,30 +39,30 @@ export default function ReviewFlow({
       )}
 
       {uncompleted.length > 0 && (
-        <div className="mb-4">
-          <div className="text-[11px] uppercase tracking-wide text-urgent mb-2">Not done</div>
+        <div className="mb-5">
+          <div className="text-xs uppercase tracking-wide text-urgent mb-2">Not done</div>
           {uncompleted.map((t) => (
-            <div key={t.id} className="py-2 border-b border-stone-800 last:border-0">
-              <div className="text-sm text-stone-200">{t.title}</div>
+            <div key={t.id} className="py-3 border-b border-border last:border-0">
+              <div className="text-base text-text">{t.title}</div>
               {t.suggestion && (
-                <div className="text-xs text-stone-500 mt-0.5">Suggestion: {t.suggestion}</div>
+                <div className="text-sm text-muted mt-1">Suggestion: {t.suggestion}</div>
               )}
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-3 mt-3">
                 <button
                   onClick={() => onAction(t.id, "tomorrow")}
-                  className="text-xs px-2.5 py-1 bg-stone-800 text-stone-200 rounded hover:bg-stone-700 transition-colors"
+                  className="text-sm px-3.5 py-1.5 bg-surface-hover text-text rounded-lg hover:bg-border transition-colors"
                 >
                   Tomorrow
                 </button>
                 <button
                   onClick={() => onAction(t.id, "drop")}
-                  className="text-xs px-2.5 py-1 text-stone-500 rounded hover:text-urgent transition-colors"
+                  className="text-sm px-3.5 py-1.5 text-muted rounded-lg hover:text-urgent transition-colors"
                 >
                   Drop
                 </button>
                 <button
                   onClick={() => onAction(t.id, "done")}
-                  className="text-xs px-2.5 py-1 text-stone-500 rounded hover:text-quick transition-colors"
+                  className="text-sm px-3.5 py-1.5 text-muted rounded-lg hover:text-done transition-colors"
                 >
                   Actually done
                 </button>
@@ -74,7 +74,7 @@ export default function ReviewFlow({
 
       <button
         onClick={onDismiss}
-        className="text-xs text-stone-500 hover:text-stone-300 transition-colors"
+        className="text-sm text-muted hover:text-text transition-colors"
       >
         Dismiss
       </button>

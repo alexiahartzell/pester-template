@@ -16,6 +16,7 @@ def list_tasks(
     status: Optional[TaskStatus] = None,
     project: Optional[str] = None,
     source: Optional[str] = None,
+    category: Optional[str] = None,
     due_before: Optional[date] = None,
     due_after: Optional[date] = None,
     db: Session = Depends(get_db),
@@ -27,6 +28,8 @@ def list_tasks(
         q = q.filter(Task.project == project)
     if source:
         q = q.filter(Task.source == source)
+    if category:
+        q = q.filter(Task.category == category)
     if due_before:
         q = q.filter(Task.due <= due_before)
     if due_after:
@@ -90,10 +93,93 @@ def get_stats(db: Session = Depends(get_db)):
         Task.status == TaskStatus.active,
         Task.project != None,
     ).scalar()
+    categories_count = db.query(func.count(func.distinct(Task.category))).filter(
+        Task.status == TaskStatus.active,
+        Task.category != None,
+    ).scalar()
     return {
         "inbox": inbox_count,
         "this_week": week_count,
         "overdue": overdue_count,
         "done_today": done_today_count,
         "projects": projects_count,
+        "categories": categories_count,
     }
+
+
+@router.get("/completion")
+def get_completion(weeks: int = Query(default=4, ge=1, le=52), db: Session = Depends(get_db)):
+    today = date.today()
+    start = today - timedelta(weeks=weeks)
+
+    # Get all resolved tasks (done or dropped) within the window
+    resolved = db.query(Task).filter(
+        Task.status.in_([TaskStatus.done, TaskStatus.dropped]),
+        Task.completed_at != None,
+        func.date(Task.completed_at) >= start,
+    ).all()
+
+    # Group by category and week
+    from collections import defaultdict
+    cat_weeks: dict[str, dict[str, dict]] = defaultdict(lambda: defaultdict(lambda: {"done": 0, "total": 0}))
+    overall_weeks: dict[str, dict] = defaultdict(lambda: {"done": 0, "total": 0})
+
+    for t in resolved:
+        cat = t.category or "uncategorized"
+        # Week start (Monday)
+        d = t.completed_at.date()
+        week_start = (d - timedelta(days=(d.weekday() + 1) % 7)).isoformat()
+
+        cat_weeks[cat][week_start]["total"] += 1
+        overall_weeks[week_start]["total"] += 1
+        if t.status == TaskStatus.done:
+            cat_weeks[cat][week_start]["done"] += 1
+            overall_weeks[week_start]["done"] += 1
+
+    def build_weeks(data: dict[str, dict]) -> list[dict]:
+        result = []
+        for week in sorted(data.keys()):
+            d, t = data[week]["done"], data[week]["total"]
+            result.append({"week": week, "done": d, "total": t, "pct": round(d / t * 100) if t else 0})
+        return result
+
+    categories = {cat: build_weeks(weeks_data) for cat, weeks_data in sorted(cat_weeks.items())}
+    overall = build_weeks(overall_weeks)
+
+    # Overall totals
+    total_done = sum(w["done"] for w in overall)
+    total_all = sum(w["total"] for w in overall)
+
+    return {
+        "categories": categories,
+        "overall": overall,
+        "total_pct": round(total_done / total_all * 100) if total_all else 0,
+        "total_done": total_done,
+        "total_resolved": total_all,
+    }
+
+
+@router.get("/distribution")
+def get_distribution(db: Session = Depends(get_db)):
+    """Task counts by category for the current week (Mon-Sun)."""
+    today = date.today()
+    week_start = today - timedelta(days=today.weekday())
+
+    # Active + done this week
+    tasks = db.query(Task).filter(
+        Task.status.in_([TaskStatus.active, TaskStatus.done]),
+        Task.created_at != None,
+        func.date(Task.created_at) >= week_start,
+    ).all()
+
+    from collections import Counter
+    counts: Counter = Counter()
+    for t in tasks:
+        counts[t.category or "uncategorized"] += 1
+
+    total = sum(counts.values())
+    slices = [
+        {"category": cat, "count": count, "pct": round(count / total * 100) if total else 0}
+        for cat, count in counts.most_common()
+    ]
+    return {"week_start": week_start.isoformat(), "total": total, "slices": slices}
