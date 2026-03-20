@@ -42,8 +42,7 @@ def _tasks_to_context(tasks: list[TaskResponse]) -> str:
             parts.append(dl)
         if t.priority:
             parts.append(f"priority:{t.priority.value}")
-        if t.source:
-            parts.append(f"from:{t.source}")
+
         if t.project:
             parts.append(f"project:{t.project}")
         if t.task_type:
@@ -70,27 +69,33 @@ def process_inbox(inbox_tasks: list[TaskResponse]) -> str:
         system=(
             "You are a task management assistant for a computational physics grad student. "
             "For each inbox task:\n"
+            "0. Fix spelling and grammar. Rewrite the title in all-lowercase style unless it contains "
+            "abbreviations (e.g. 'DFT', 'PI', 'GPU') or proper nouns. Keep it concise.\n"
             "1. Assign a category from this list: " + ", ".join(CATEGORIES) + ".\n"
-            "2. Infer project, source, and suggest priority (high/medium/low) and due date if obvious. "
-            "If you suggest a due date, also specify deadline_type as 'hard' (immovable — submission, "
-            "presentation, meeting) or 'soft' (aspirational — self-imposed, flexible). "
-            "If there's no due date, ask the user if there's a deadline and whether it's hard or soft.\n"
+            "2. Infer project and suggest priority (high/medium/low) and due date if obvious. "
+            "If the category is 'my meetings' or 'group meetings', the task MUST include a time "
+            "(e.g. '2pm advisor check-in'). If no time was given, set needs_clarification to true and ask what time.\n"
+            "Every task MUST have a due date and a deadline_type. "
+            "deadline_type is 'hard' (immovable — submission, presentation, meeting) or 'soft' (aspirational — self-imposed, flexible). "
+            "If the user didn't specify a deadline, suggest a reasonable soft deadline based on the task. "
+            "Always set needs_clarification to true and ask if your suggested deadline is right, "
+            "and whether it should be hard or soft.\n"
             "3. Check granularity: each task should be roughly 1-2 hours of concrete work. "
             "If a task is too vague or too broad (e.g. 'read all the papers', 'converge these models', "
             "'finish the project', 'work on research'), set 'needs_clarification' to true and write a "
             "'clarification_prompt' — a short question asking the user to be more specific about what "
-            "exactly they need to do. For example: 'Which papers? How many?' or 'Which models and what convergence criteria?'. "
+            "exactly they need to do. For example: 'which papers? how many?' or 'which models and what convergence criteria?'. "
             "Do NOT guess subtasks. Just ask. "
             "If the task is already concrete and reasonably scoped, leave needs_clarification as false.\n\n"
             "Respond with a JSON object with key 'tasks' containing an array. Each object has: "
-            "id, title, suggested_category, suggested_project, suggested_source, "
+            "id, title, suggested_category, suggested_project, "
             "suggested_priority (high/medium/low), suggested_due (YYYY-MM-DD or null), "
             "suggested_deadline_type ('hard', 'soft', or null), "
             "reasoning (one sentence), needs_clarification (boolean), "
             "clarification_prompt (string or null — include deadline questions here if no due date). "
             "Only return JSON."
         ),
-        user=f"Categorize and check granularity of these inbox tasks:\n{task_text}",
+        user=f"Today's date is {date.today().isoformat()}. Categorize and check granularity of these inbox tasks:\n{task_text}",
     )
 
 

@@ -24,7 +24,6 @@ export default function TaskRow({ task, onUpdate }: TaskRowProps) {
   const [editTitle, setEditTitle] = useState(task.title);
   const [editDue, setEditDue] = useState(task.due || "");
   const [editDeadlineType, setEditDeadlineType] = useState(task.deadline_type || "");
-  const [editSource, setEditSource] = useState(task.source || "");
   const [editProject, setEditProject] = useState(task.project || "");
   const [editCategory, setEditCategory] = useState(task.category || "");
   const [editPriority, setEditPriority] = useState<Task["priority"]>(task.priority || "medium");
@@ -55,7 +54,7 @@ export default function TaskRow({ task, onUpdate }: TaskRowProps) {
       title: editTitle,
       due: editDue || null,
       deadline_type: editDeadlineType || null,
-      source: editSource || null,
+
       project: editProject || null,
       category: editCategory || null,
       priority: editPriority as Task["priority"],
@@ -166,14 +165,7 @@ export default function TaskRow({ task, onUpdate }: TaskRowProps) {
                 <option value="high">High</option>
               </select>
             </div>
-            <div>
-              <label className="text-xs uppercase tracking-wide text-muted block mb-1.5">Source</label>
-              <input
-                value={editSource}
-                onChange={(e) => setEditSource(e.target.value)}
-                className="w-full bg-bg text-text px-4 py-2.5 rounded-lg border border-border outline-none text-sm"
-              />
-            </div>
+
           </div>
           <div>
             <label className="text-xs uppercase tracking-wide text-muted block mb-1.5">Notes</label>

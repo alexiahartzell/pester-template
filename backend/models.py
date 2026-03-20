@@ -28,7 +28,6 @@ class Task(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=False)
     project = Column(String, nullable=True)
-    source = Column(String, nullable=True)
     due = Column(Date, nullable=True)
     deadline_type = Column(String, nullable=True)  # "hard" or "soft"
     priority = Column(Enum(TaskPriority), default=TaskPriority.medium)
@@ -46,7 +45,6 @@ class Task(Base):
 class TaskCreate(BaseModel):
     title: str
     project: Optional[str] = None
-    source: Optional[str] = None
     due: Optional[date] = None
     deadline_type: Optional[str] = None
     priority: Optional[TaskPriority] = None
@@ -60,7 +58,6 @@ class TaskCreate(BaseModel):
 class TaskUpdate(BaseModel):
     title: Optional[str] = None
     project: Optional[str] = None
-    source: Optional[str] = None
     due: Optional[date] = None
     deadline_type: Optional[str] = None
     priority: Optional[TaskPriority] = None
@@ -75,7 +72,7 @@ class TaskResponse(BaseModel):
     id: int
     title: str
     project: Optional[str]
-    source: Optional[str]
+
     due: Optional[date]
     deadline_type: Optional[str]
     priority: TaskPriority

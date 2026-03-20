@@ -31,25 +31,28 @@ def _save_plan(plan: dict):
     _PLAN_PATH.write_text(json.dumps(plan))
 
 
-@router.post("/standup")
-def run_standup(db: Session = Depends(get_db)):
+@router.post("/process-inbox")
+def run_process_inbox(db: Session = Depends(get_db)):
     inbox_tasks = db.query(Task).filter(Task.status == TaskStatus.inbox).all()
-    inbox_suggestions = None
-    if inbox_tasks:
-        inbox_schemas = [TaskResponse.model_validate(t) for t in inbox_tasks]
-        raw = process_inbox(inbox_schemas)
-        try:
-            parsed = json.loads(raw)
-            # Ollama wraps arrays in an object — extract the array
-            if isinstance(parsed, dict) and "tasks" in parsed:
-                inbox_suggestions = parsed["tasks"]
-            elif isinstance(parsed, list):
-                inbox_suggestions = parsed
-            else:
-                inbox_suggestions = parsed
-        except json.JSONDecodeError:
-            inbox_suggestions = raw
+    if not inbox_tasks:
+        return {"inbox_suggestions": []}
+    inbox_schemas = [TaskResponse.model_validate(t) for t in inbox_tasks]
+    raw = process_inbox(inbox_schemas)
+    try:
+        parsed = json.loads(raw)
+        if isinstance(parsed, dict) and "tasks" in parsed:
+            inbox_suggestions = parsed["tasks"]
+        elif isinstance(parsed, list):
+            inbox_suggestions = parsed
+        else:
+            inbox_suggestions = parsed
+    except json.JSONDecodeError:
+        inbox_suggestions = raw
+    return {"inbox_suggestions": inbox_suggestions}
 
+
+@router.post("/plan-day")
+def run_plan_day(db: Session = Depends(get_db)):
     active_tasks = db.query(Task).filter(Task.status == TaskStatus.active).all()
     today = date.today()
 
@@ -83,10 +86,7 @@ def run_standup(db: Session = Depends(get_db)):
         }
         _save_plan(today_plan)
 
-    return {
-        "inbox_suggestions": inbox_suggestions,
-        "plan": today_plan,
-    }
+    return {"plan": today_plan}
 
 
 class ReprioritizeRequest(BaseModel):

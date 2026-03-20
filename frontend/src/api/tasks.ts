@@ -4,7 +4,6 @@ export interface Task {
   id: number;
   title: string;
   project: string | null;
-  source: string | null;
   due: string | null;
   deadline_type: string | null;
   priority: "high" | "medium" | "low";
@@ -103,7 +102,8 @@ export interface HoursData {
 }
 
 export const ai = {
-  standup: () => apiFetch<any>("/standup", { method: "POST" }),
+  processInbox: () => apiFetch<any>("/process-inbox", { method: "POST" }),
+  planDay: () => apiFetch<any>("/plan-day", { method: "POST" }),
   reprioritize: (context: string) =>
     apiFetch<any>("/reprioritize", {
       method: "POST",

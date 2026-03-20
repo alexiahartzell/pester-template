@@ -11,6 +11,7 @@ import PlansChanged from "./components/PlansChanged";
 import StandupFlow from "./components/StandupFlow";
 import ReviewFlow from "./components/ReviewFlow";
 import CompletionTracker from "./components/CompletionTracker";
+import RecentlyDone from "./components/RecentlyDone";
 import WeeklyPieChart from "./components/WeeklyPieChart";
 
 export default function App() {
@@ -22,7 +23,8 @@ export default function App() {
   const [reprioritizing, setReprioritizing] = useState(false);
   const [standupSuggestions, setStandupSuggestions] = useState<any[] | null>(null);
   const [reviewData, setReviewData] = useState<any | null>(null);
-  const [loadingStandup, setLoadingStandup] = useState(false);
+  const [loadingProcess, setLoadingProcess] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState(false);
   const [loadingReview, setLoadingReview] = useState(false);
   const [hours, setHours] = useState<HoursData | null>(null);
 
@@ -53,16 +55,25 @@ export default function App() {
     refresh();
   };
 
-  const handleRunStandup = async () => {
-    setLoadingStandup(true);
+  const handleProcessInbox = async () => {
+    setLoadingProcess(true);
     try {
-      const result = await ai.standup();
-      if (result.inbox_suggestions && Array.isArray(result.inbox_suggestions)) {
+      const result = await ai.processInbox();
+      if (result.inbox_suggestions && Array.isArray(result.inbox_suggestions) && result.inbox_suggestions.length > 0) {
         setStandupSuggestions(result.inbox_suggestions);
       }
+    } finally {
+      setLoadingProcess(false);
+    }
+  };
+
+  const handlePlanDay = async () => {
+    setLoadingPlan(true);
+    try {
+      await ai.planDay();
       refresh();
     } finally {
-      setLoadingStandup(false);
+      setLoadingPlan(false);
     }
   };
 
@@ -130,11 +141,18 @@ export default function App() {
         </div>
         <div className="flex gap-3">
           <button
-            onClick={handleRunStandup}
-            disabled={loadingStandup}
+            onClick={handleProcessInbox}
+            disabled={loadingProcess}
             className="text-sm px-4 py-2 bg-surface border border-border text-text rounded-lg hover:bg-surface-hover transition-colors disabled:opacity-50"
           >
-            {loadingStandup ? "Running..." : "Plan my day"}
+            {loadingProcess ? "Running..." : "Process new"}
+          </button>
+          <button
+            onClick={handlePlanDay}
+            disabled={loadingPlan}
+            className="text-sm px-4 py-2 bg-surface border border-border text-text rounded-lg hover:bg-surface-hover transition-colors disabled:opacity-50"
+          >
+            {loadingPlan ? "Running..." : "Plan my day"}
           </button>
           <button
             onClick={() => setShowPlansChanged(true)}
@@ -202,6 +220,14 @@ export default function App() {
       {activeView === "projects" && (
         <ProjectsView tasks={allTasks} onUpdate={handleUpdate} />
       )}
+
+      <RecentlyDone
+        tasks={allTasks}
+        onUndo={async (id) => {
+          await tasksApi.update(id, { status: "active" });
+          refresh();
+        }}
+      />
 
       <WeeklyPieChart />
       <CompletionTracker />

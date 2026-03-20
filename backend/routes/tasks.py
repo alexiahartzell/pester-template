@@ -15,7 +15,6 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 def list_tasks(
     status: Optional[TaskStatus] = None,
     project: Optional[str] = None,
-    source: Optional[str] = None,
     category: Optional[str] = None,
     due_before: Optional[date] = None,
     due_after: Optional[date] = None,
@@ -26,8 +25,6 @@ def list_tasks(
         q = q.filter(Task.status == status)
     if project:
         q = q.filter(Task.project == project)
-    if source:
-        q = q.filter(Task.source == source)
     if category:
         q = q.filter(Task.category == category)
     if due_before:
@@ -52,8 +49,11 @@ def update_task(task_id: int, updates: TaskUpdate, db: Session = Depends(get_db)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     update_data = updates.model_dump(exclude_unset=True)
-    if "status" in update_data and update_data["status"] == TaskStatus.done:
-        update_data["completed_at"] = datetime.now()
+    if "status" in update_data:
+        if update_data["status"] == TaskStatus.done:
+            update_data["completed_at"] = datetime.now()
+        elif update_data["status"] == TaskStatus.active:
+            update_data["completed_at"] = None
     for key, value in update_data.items():
         setattr(task, key, value)
     db.commit()
