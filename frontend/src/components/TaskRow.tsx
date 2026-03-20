@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Task } from "../api/tasks";
-import { getCategoryColor, getCategoryBorderColor, CATEGORIES } from "../categoryColors";
+import { getCategoryColor, CATEGORIES } from "../categoryColors";
 
 function getTypeLabel(task: Task): string {
   if (task.due) {
@@ -31,19 +31,23 @@ export default function TaskRow({ task, onUpdate }: TaskRowProps) {
 
   const isDone = task.status === "done";
   const isOverdue = task.due && new Date(task.due + "T00:00:00") < new Date(new Date().toDateString());
-  const isHighPriority = task.priority === "high";
   const typeLabel = getTypeLabel(task);
 
-  // Color priority: overdue > high priority > category
-  let borderColor = getCategoryBorderColor(task.category);
   let labelColor = getCategoryColor(task.category);
-  if (isHighPriority && !isOverdue) {
-    borderColor = "border-l-warm";
-  }
   if (isOverdue) {
-    borderColor = "border-l-urgent";
     labelColor = "text-urgent";
   }
+
+  // Priority strip pattern
+  const priorityStrip: React.CSSProperties = task.priority === "high" ? {
+    backgroundImage: "repeating-linear-gradient(135deg, #fff 0px, #fff 2px, transparent 2px, transparent 5px)",
+    backgroundColor: "#444",
+  } : task.priority === "medium" ? {
+    backgroundImage: "repeating-linear-gradient(90deg, #888 0px, #888 2px, transparent 2px, transparent 6px)",
+    backgroundColor: "#2a2a2e",
+  } : {
+    backgroundColor: "#666",
+  };
 
   const handleCheck = () => {
     onUpdate(task.id, { status: isDone ? "active" : "done" });
@@ -69,7 +73,9 @@ export default function TaskRow({ task, onUpdate }: TaskRowProps) {
   };
 
   return (
-    <div className={`bg-surface rounded-xl border-l-[3px] ${borderColor} mb-2`}>
+    <div className="bg-surface rounded-xl mb-2 flex overflow-hidden">
+      <div className="w-2 flex-shrink-0 rounded-l-xl" style={priorityStrip} />
+      <div className="flex-1 min-w-0">
       <div
         className="flex items-center px-5 py-4 cursor-pointer gap-4"
         onClick={() => setExpanded(!expanded)}
@@ -198,6 +204,7 @@ export default function TaskRow({ task, onUpdate }: TaskRowProps) {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

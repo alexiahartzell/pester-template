@@ -14,12 +14,12 @@ function pctTextColor(pct: number): string {
   return "text-urgent";
 }
 
-export default function CompletionTracker() {
+export default function CompletionTracker({ refreshKey }: { refreshKey?: number }) {
   const [data, setData] = useState<CompletionData | null>(null);
 
   useEffect(() => {
     tasksApi.completion(4).then(setData);
-  }, []);
+  }, [refreshKey]);
 
   if (!data) return null;
 

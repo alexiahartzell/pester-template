@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from backend.db import get_db
 from backend.models import Task, TaskResponse, TaskStatus
-from backend.services.ai_planner import plan_day, process_inbox, reprioritize, generate_review
+from backend.services.ai_planner import plan_day, process_inbox, generate_review
 from backend.services.scheduler import _mark_sent, record_end, get_today_hours
 from backend.services.slack import post_message, format_plan_message, format_review_message
 
@@ -38,17 +38,36 @@ def run_process_inbox(db: Session = Depends(get_db)):
         return {"inbox_suggestions": []}
     inbox_schemas = [TaskResponse.model_validate(t) for t in inbox_tasks]
     raw = process_inbox(inbox_schemas)
+
+    ai_suggestions = []
     try:
         parsed = json.loads(raw)
         if isinstance(parsed, dict) and "tasks" in parsed:
-            inbox_suggestions = parsed["tasks"]
+            ai_suggestions = parsed["tasks"]
         elif isinstance(parsed, list):
-            inbox_suggestions = parsed
-        else:
-            inbox_suggestions = parsed
+            ai_suggestions = parsed
     except json.JSONDecodeError:
-        inbox_suggestions = raw
-    return {"inbox_suggestions": inbox_suggestions}
+        pass
+
+    # Pair by position — never trust AI-returned IDs
+    results = []
+    for i, task in enumerate(inbox_tasks):
+        suggestion = ai_suggestions[i] if i < len(ai_suggestions) and isinstance(ai_suggestions[i], dict) else {}
+        results.append({
+            "original_id": task.id,
+            "original_title": task.title,
+            "suggested_title": suggestion.get("title", task.title),
+            "suggested_category": suggestion.get("suggested_category"),
+            "suggested_project": suggestion.get("suggested_project"),
+            "suggested_priority": suggestion.get("suggested_priority", "medium"),
+            "suggested_due": suggestion.get("suggested_due"),
+            "suggested_deadline_type": suggestion.get("suggested_deadline_type"),
+            "reasoning": suggestion.get("reasoning", ""),
+            "needs_clarification": suggestion.get("needs_clarification", False),
+            "clarification_prompt": suggestion.get("clarification_prompt"),
+        })
+
+    return {"inbox_suggestions": results}
 
 
 @router.post("/plan-day")
@@ -88,35 +107,6 @@ def run_plan_day(db: Session = Depends(get_db)):
 
     return {"plan": today_plan}
 
-
-class ReprioritizeRequest(BaseModel):
-    context: str
-
-
-@router.post("/reprioritize")
-def run_reprioritize(req: ReprioritizeRequest, db: Session = Depends(get_db)):
-    active_tasks = db.query(Task).filter(Task.status == TaskStatus.active).all()
-    active_schemas = [TaskResponse.model_validate(t) for t in active_tasks]
-    current_plan = _load_plan()
-
-    raw = reprioritize(active_schemas, current_plan.get("plan", []), req.context)
-    try:
-        plan_data = json.loads(raw)
-    except json.JSONDecodeError:
-        plan_data = {"plan": [], "deferred": [], "note": raw}
-
-    today_plan = {
-        "date": date.today().isoformat(),
-        "plan": plan_data.get("plan", []),
-        "deferred": plan_data.get("deferred", []),
-        "note": plan_data.get("note"),
-    }
-    _save_plan(today_plan)
-
-    # Post to Slack
-    post_message("Plans reshuffled.\n" + format_plan_message(today_plan))
-
-    return {"plan": today_plan}
 
 
 @router.post("/review")

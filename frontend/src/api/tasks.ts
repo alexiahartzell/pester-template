@@ -104,11 +104,6 @@ export interface HoursData {
 export const ai = {
   processInbox: () => apiFetch<any>("/process-inbox", { method: "POST" }),
   planDay: () => apiFetch<any>("/plan-day", { method: "POST" }),
-  reprioritize: (context: string) =>
-    apiFetch<any>("/reprioritize", {
-      method: "POST",
-      body: JSON.stringify({ context }),
-    }),
   review: () => apiFetch<any>("/review", { method: "POST" }),
   todayPlan: () => apiFetch<DayPlan>("/plan/today"),
   hours: () => apiFetch<HoursData>("/hours/today"),

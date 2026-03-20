@@ -7,26 +7,25 @@ import InboxView from "./components/InboxView";
 import WeekView from "./components/WeekView";
 import ProjectsView from "./components/ProjectsView";
 import CategoryView from "./components/CategoryView";
-import PlansChanged from "./components/PlansChanged";
 import StandupFlow from "./components/StandupFlow";
 import ReviewFlow from "./components/ReviewFlow";
 import CompletionTracker from "./components/CompletionTracker";
 import RecentlyDone from "./components/RecentlyDone";
 import WeeklyPieChart from "./components/WeeklyPieChart";
+import MonthlyCalendar from "./components/MonthlyCalendar";
 
 export default function App() {
   const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [stats, setStats] = useState<Stats>({ inbox: 0, this_week: 0, overdue: 0, done_today: 0, projects: 0, categories: 0 });
   const [plan, setPlan] = useState<DayPlan>({ date: "", plan: [], deferred: [], note: null });
   const [activeView, setActiveView] = useState<string | null>(null);
-  const [showPlansChanged, setShowPlansChanged] = useState(false);
-  const [reprioritizing, setReprioritizing] = useState(false);
   const [standupSuggestions, setStandupSuggestions] = useState<any[] | null>(null);
   const [reviewData, setReviewData] = useState<any | null>(null);
   const [loadingProcess, setLoadingProcess] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState(false);
   const [loadingReview, setLoadingReview] = useState(false);
   const [hours, setHours] = useState<HoursData | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const refresh = useCallback(async () => {
     const [taskList, statsData, planData, hoursData] = await Promise.all([
@@ -39,6 +38,7 @@ export default function App() {
     setStats(statsData);
     setPlan(planData);
     setHours(hoursData);
+    setRefreshKey((k) => k + 1);
   }, []);
 
   useEffect(() => {
@@ -74,17 +74,6 @@ export default function App() {
       refresh();
     } finally {
       setLoadingPlan(false);
-    }
-  };
-
-  const handleReprioritize = async (context: string) => {
-    setReprioritizing(true);
-    try {
-      await ai.reprioritize(context);
-      refresh();
-      setShowPlansChanged(false);
-    } finally {
-      setReprioritizing(false);
     }
   };
 
@@ -155,12 +144,6 @@ export default function App() {
             {loadingPlan ? "Running..." : "Plan my day"}
           </button>
           <button
-            onClick={() => setShowPlansChanged(true)}
-            className="text-sm px-4 py-2 bg-surface border border-border text-text rounded-lg hover:bg-surface-hover transition-colors"
-          >
-            Reshuffle
-          </button>
-          <button
             onClick={handleRunReview}
             disabled={loadingReview}
             className="text-sm px-4 py-2 bg-surface border border-border text-text rounded-lg hover:bg-surface-hover transition-colors disabled:opacity-50"
@@ -175,8 +158,25 @@ export default function App() {
       {standupSuggestions && (
         <StandupFlow
           suggestions={standupSuggestions}
-          onAccept={async (id, data) => {
-            await handleUpdate(id, data);
+          onAccept={async (originalId, data) => {
+            try {
+              await tasksApi.createFull({
+                title: data.title!,
+                category: data.category,
+                project: data.project,
+                priority: data.priority || "medium" as any,
+                due: data.due,
+                deadline_type: data.deadline_type,
+                status: "active",
+              });
+              await tasksApi.update(originalId, { status: "dropped" });
+              setStandupSuggestions((prev) =>
+                prev ? prev.filter((s) => s.original_id !== originalId) : null
+              );
+              refresh();
+            } catch (err) {
+              console.error("Accept failed:", err);
+            }
           }}
           onDismiss={() => setStandupSuggestions(null)}
         />
@@ -229,16 +229,10 @@ export default function App() {
         }}
       />
 
-      <WeeklyPieChart />
-      <CompletionTracker />
+      <MonthlyCalendar tasks={allTasks} />
 
-      {showPlansChanged && (
-        <PlansChanged
-          onSubmit={handleReprioritize}
-          onClose={() => setShowPlansChanged(false)}
-          loading={reprioritizing}
-        />
-      )}
+      <WeeklyPieChart refreshKey={refreshKey} />
+      <CompletionTracker refreshKey={refreshKey} />
     </div>
   );
 }

@@ -38,12 +38,12 @@ function buildConicGradient(slices: { category: string; pct: number }[]): string
   return `conic-gradient(${parts.join(", ")})`;
 }
 
-export default function WeeklyPieChart() {
+export default function WeeklyPieChart({ refreshKey }: { refreshKey?: number }) {
   const [data, setData] = useState<DistributionData | null>(null);
 
   useEffect(() => {
     tasksApi.distribution().then(setData);
-  }, []);
+  }, [refreshKey]);
 
   if (!data) return null;
 

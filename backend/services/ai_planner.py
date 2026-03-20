@@ -62,8 +62,16 @@ CATEGORIES = [
 ]
 
 
+def _inbox_to_context(tasks: list[TaskResponse]) -> str:
+    """Numbered list (1-based) for inbox processing — no DB IDs exposed to AI."""
+    lines = []
+    for i, t in enumerate(tasks, 1):
+        lines.append(f"{i}. {t.title}")
+    return "\n".join(lines)
+
+
 def process_inbox(inbox_tasks: list[TaskResponse]) -> str:
-    task_text = _tasks_to_context(inbox_tasks)
+    task_text = _inbox_to_context(inbox_tasks)
 
     return _chat(
         system=(
@@ -73,8 +81,10 @@ def process_inbox(inbox_tasks: list[TaskResponse]) -> str:
             "abbreviations (e.g. 'DFT', 'PI', 'GPU') or proper nouns. Keep it concise.\n"
             "1. Assign a category from this list: " + ", ".join(CATEGORIES) + ".\n"
             "2. Infer project and suggest priority (high/medium/low) and due date if obvious. "
-            "If the category is 'my meetings' or 'group meetings', the task MUST include a time "
-            "(e.g. '2pm advisor check-in'). If no time was given, set needs_clarification to true and ask what time.\n"
+            "If the category is 'my meetings' or 'group meetings', the title MUST start with a time "
+            "(e.g. '2pm advisor check-in', '10am group meeting'). If the user did not include a time, "
+            "you MUST set needs_clarification to true and set clarification_prompt to ask what time the meeting is. "
+            "Do NOT accept a meeting without a time.\n"
             "Every task MUST have a due date and a deadline_type. "
             "deadline_type is 'hard' (immovable — submission, presentation, meeting) or 'soft' (aspirational — self-imposed, flexible). "
             "If the user didn't specify a deadline, suggest a reasonable soft deadline based on the task. "
@@ -88,11 +98,12 @@ def process_inbox(inbox_tasks: list[TaskResponse]) -> str:
             "Do NOT guess subtasks. Just ask. "
             "If the task is already concrete and reasonably scoped, leave needs_clarification as false.\n\n"
             "Respond with a JSON object with key 'tasks' containing an array. Each object has: "
-            "id, title, suggested_category, suggested_project, "
+            "title, suggested_category, suggested_project, "
             "suggested_priority (high/medium/low), suggested_due (YYYY-MM-DD or null), "
             "suggested_deadline_type ('hard', 'soft', or null), "
             "reasoning (one sentence), needs_clarification (boolean), "
             "clarification_prompt (string or null — include deadline questions here if no due date). "
+            "IMPORTANT: Return tasks in the EXACT same order they are listed. Do not reorder, skip, or merge tasks. "
             "Only return JSON."
         ),
         user=f"Today's date is {date.today().isoformat()}. Categorize and check granularity of these inbox tasks:\n{task_text}",
@@ -116,22 +127,6 @@ def plan_day(active_tasks: list[TaskResponse], done_today_count: int) -> str:
         user=f"Today is {today}. Tasks done today: {done_today_count}. Active tasks:\n{task_text}",
     )
 
-
-def reprioritize(active_tasks: list[TaskResponse], current_plan: list[dict], context: str) -> str:
-    task_text = _tasks_to_context(active_tasks)
-    today = date.today().isoformat()
-
-    return _chat(
-        system=(
-            "You are a task management assistant. The user's plans changed and they need a new daily plan. "
-            "Respond with a JSON object: {plan: [{id, title, reason}], deferred: [{id, title, reason}], note: string|null}. "
-            "Only return JSON."
-        ),
-        user=(
-            f"Today is {today}. Here's what changed: {context}\n\n"
-            f"Current active tasks:\n{task_text}"
-        ),
-    )
 
 
 def generate_review(planned_tasks: list[dict], all_tasks: list[TaskResponse]) -> str:
