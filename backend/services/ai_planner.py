@@ -1,34 +1,35 @@
+import subprocess
 from datetime import date
 
-import httpx
-
-from backend.config import get_config_value
 from backend.models import TaskResponse
 
-OLLAMA_URL = "http://localhost:11434/api/chat"
-DEFAULT_MODEL = "llama3.2:3b"
+CLAUDE_CMD = "/Users/alexia/.local/bin/claude"
 
 
 def _chat(system: str, user: str) -> str:
-    """Send a chat request to Ollama and return the response text."""
-    model = get_config_value("ollama_model", DEFAULT_MODEL)
-    resp = httpx.post(
-        OLLAMA_URL,
-        json={
-            "model": model,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            "stream": False,
-            "options": {"temperature": 0.3, "num_ctx": 2048},
-            "format": "json",
-            "keep_alive": "5m",
-        },
+    """Send a prompt to Claude Code CLI and return the response."""
+    prompt = f"{system}\n\n{user}\n\nRespond with JSON only."
+    result = subprocess.run(
+        [CLAUDE_CMD, "-p", prompt, "--output-format", "json"],
+        capture_output=True,
+        text=True,
         timeout=120,
     )
-    resp.raise_for_status()
-    return resp.json()["message"]["content"]
+    if result.returncode != 0:
+        raise RuntimeError(f"Claude CLI failed: {result.stderr}")
+    import json
+    import re
+    try:
+        wrapper = json.loads(result.stdout)
+        text = wrapper.get("result", result.stdout) if isinstance(wrapper, dict) else result.stdout
+    except json.JSONDecodeError:
+        text = result.stdout
+    # Strip markdown code fences if present
+    text = text.strip()
+    m = re.search(r"```(?:json)?\s*\n?(.*?)\n?\s*```", text, re.DOTALL)
+    if m:
+        text = m.group(1).strip()
+    return text
 
 
 def _tasks_to_context(tasks: list[TaskResponse]) -> str:
@@ -133,11 +134,20 @@ def plan_day(active_tasks: list[TaskResponse], done_today_count: int) -> str:
 
 
 
-def generate_review(planned_tasks: list[dict], all_tasks: list[TaskResponse]) -> str:
+def _normalize_plan_item(item) -> str:
+    """Handle both dict {id, title} and list [id, title, ...] formats from AI."""
+    if isinstance(item, dict):
+        return f"[{item.get('id', '?')}] {item.get('title', '?')}"
+    if isinstance(item, list) and len(item) >= 2:
+        return f"[{item[0]}] {item[1]}"
+    return str(item)
+
+
+def generate_review(planned_tasks: list, all_tasks: list[TaskResponse]) -> str:
     task_text = _tasks_to_context(all_tasks)
 
     planned_summary = "\n".join(
-        f"[{t['id']}] {t['title']}" for t in planned_tasks
+        _normalize_plan_item(t) for t in planned_tasks
     )
 
     return _chat(

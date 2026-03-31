@@ -1,5 +1,5 @@
 import json
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -82,6 +82,24 @@ def overdue_check():
 HOURS_START_DATE = date(2026, 3, 22)  # Start tracking Sunday 2026-03-22
 
 
+def _close_out_previous_day():
+    """If there's an open day (started but not ended), close it and log it."""
+    data = _load_hours()
+    today = date.today().isoformat()
+    if data.get("date") and data["date"] != today and data.get("start") and not data.get("hours"):
+        # Previous day was never wrapped up — estimate end as last known activity
+        # Use 11:59pm of that day as the end cap, but more realistically
+        # the user stopped when they stopped using the app. Use a conservative
+        # 8 hours from start as a cap, or end of that day, whichever is earlier.
+        start = datetime.fromisoformat(data["start"])
+        end_of_day = datetime.fromisoformat(data["date"] + "T23:59:59")
+        capped_end = min(start + timedelta(hours=10), end_of_day)
+        data["end"] = capped_end.isoformat()
+        data["hours"] = round((capped_end - start).total_seconds() / 3600, 1)
+        _save_hours(data)
+        _log_day(data)
+
+
 def record_start():
     """Record the server start time as the day's work start."""
     today = date.today()
@@ -89,6 +107,7 @@ def record_start():
         return
     data = _load_hours()
     if data.get("date") != today.isoformat():
+        _close_out_previous_day()
         data = {"date": today.isoformat(), "start": datetime.now().isoformat(), "end": None, "hours": None}
     elif not data.get("start"):
         data["start"] = datetime.now().isoformat()
@@ -193,17 +212,28 @@ def _save_hours(data: dict):
 
 # --- Scheduler ---
 
+def _daily_check():
+    """Runs periodically to catch new days even if server never restarted."""
+    if not _already_sent_today("morning"):
+        record_start()
+        if _missed_review_yesterday():
+            _send("You skipped yesterday's review. Open pester to wrap up before starting today.")
+        morning_nudge()
+        _mark_sent("morning")
+
+
 def start_scheduler():
     scheduler.add_job(
         lambda: (overdue_check(), _mark_sent("overdue")),
         "cron", hour=12, minute=0, id="overdue_check",
     )
+    scheduler.add_job(
+        _daily_check, "interval", minutes=15, id="daily_check",
+    )
     scheduler.start()
 
-    # Record work start time
+    # Run immediately on startup too
     record_start()
-
-    # Morning nudge on startup
     if not _already_sent_today("morning"):
         if _missed_review_yesterday():
             _send("You skipped yesterday's review. Open pester to wrap up before starting today.")
