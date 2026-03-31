@@ -1,75 +1,77 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400">
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="580" viewBox="0 0 720 580">
   <defs>
     <style>
       text { font-family: -apple-system, 'Inter', sans-serif; dominant-baseline: central; }
     </style>
   </defs>
-  <rect width="720" height="400" rx="12" fill="#121215"/>
+  <rect width="720" height="580" rx="12" fill="#121215"/>
 
   <!-- Triage card -->
-  <rect x="40" y="20" width="640" height="360" rx="12" fill="#1e1e22" stroke="#2e2e33"/>
+  <rect x="40" y="20" width="640" height="540" rx="12" fill="#1e1e22" stroke="#2e2e33"/>
 
   <!-- Header -->
   <text x="60" y="48" fill="#ffcc44" font-size="11" font-weight="600" letter-spacing="1">SORT NEW TASKS</text>
   <text x="60" y="68" fill="#6b6b76" font-size="13">Review and adjust each task, then accept.</text>
 
-  <!-- Divider -->
-  <line x1="60" y1="84" x2="660" y2="84" stroke="#2e2e33"/>
+  <!-- === Task 1 — vague, AI changed title, needs clarification === -->
+  <line x1="60" y1="86" x2="660" y2="86" stroke="#2e2e33"/>
 
-  <!-- Task 1 - vague, needs clarification -->
-  <text x="60" y="104" fill="#6b6b76" font-size="12" text-decoration="line-through">Work on the paper</text>
-  <text x="60" y="122" fill="#6b6b76" font-size="12">Writing task — needs more detail on scope.</text>
-  <text x="60" y="142" fill="#ff9966" font-size="12">which paper and which section? writing, editing, or figures?</text>
+  <text x="60" y="108" fill="#6b6b76" font-size="13" text-decoration="line-through">work on the paper</text>
+  <text x="60" y="128" fill="#6b6b76" font-size="12">Writing task — needs more detail on which section.</text>
+  <text x="60" y="148" fill="#ff9966" font-size="12">which paper and which section? writing new text, editing, or figures?</text>
 
-  <!-- Fields row 1 -->
-  <rect x="60" y="158" width="290" height="32" rx="6" fill="#121215" stroke="#2e2e33"/>
-  <text x="72" y="168" fill="#6b6b76" font-size="9" font-weight="600">TITLE</text>
-  <text x="72" y="182" fill="#ededf0" font-size="12">write results section for draft</text>
+  <!-- Title (full width) -->
+  <rect x="60" y="164" width="600" height="36" rx="8" fill="#121215" stroke="#2e2e33"/>
+  <text x="72" y="175" fill="#6b6b76" font-size="9" font-weight="600" letter-spacing="0.5">TITLE</text>
+  <text x="72" y="191" fill="#ededf0" font-size="12">write results section for draft</text>
 
-  <rect x="364" y="158" width="138" height="32" rx="6" fill="#121215" stroke="#2e2e33"/>
-  <text x="376" y="168" fill="#6b6b76" font-size="9" font-weight="600">CATEGORY</text>
-  <text x="376" y="182" fill="#5eaaee" font-size="12">my research</text>
+  <!-- Category | Priority -->
+  <rect x="60" y="208" width="292" height="36" rx="8" fill="#121215" stroke="#2e2e33"/>
+  <text x="72" y="219" fill="#6b6b76" font-size="9" font-weight="600" letter-spacing="0.5">CATEGORY</text>
+  <text x="72" y="235" fill="#5eaaee" font-size="12">my research</text>
+  <rect x="368" y="208" width="292" height="36" rx="8" fill="#121215" stroke="#2e2e33"/>
+  <text x="380" y="219" fill="#6b6b76" font-size="9" font-weight="600" letter-spacing="0.5">PRIORITY</text>
+  <text x="380" y="235" fill="#ededf0" font-size="12">high</text>
 
-  <rect x="516" y="158" width="138" height="32" rx="6" fill="#121215" stroke="#2e2e33"/>
-  <text x="528" y="168" fill="#6b6b76" font-size="9" font-weight="600">PRIORITY</text>
-  <text x="528" y="182" fill="#ededf0" font-size="12">high</text>
+  <!-- Due | Deadline -->
+  <rect x="60" y="252" width="292" height="36" rx="8" fill="#121215" stroke="#2e2e33"/>
+  <text x="72" y="263" fill="#6b6b76" font-size="9" font-weight="600" letter-spacing="0.5">DUE</text>
+  <text x="72" y="279" fill="#ededf0" font-size="12">2026-04-04</text>
+  <rect x="368" y="252" width="292" height="36" rx="8" fill="#121215" stroke="#2e2e33"/>
+  <text x="380" y="263" fill="#6b6b76" font-size="9" font-weight="600" letter-spacing="0.5">DEADLINE</text>
+  <text x="380" y="279" fill="#ededf0" font-size="12">soft</text>
 
-  <!-- Fields row 2 -->
-  <rect x="60" y="198" width="138" height="32" rx="6" fill="#121215" stroke="#2e2e33"/>
-  <text x="72" y="208" fill="#6b6b76" font-size="9" font-weight="600">DUE</text>
-  <text x="72" y="222" fill="#ededf0" font-size="12">2026-04-04</text>
+  <!-- Difficulty | Project -->
+  <rect x="60" y="296" width="292" height="36" rx="8" fill="#121215" stroke="#2e2e33"/>
+  <text x="72" y="307" fill="#6b6b76" font-size="9" font-weight="600" letter-spacing="0.5">DIFFICULTY</text>
+  <text x="72" y="323" fill="#ededf0" font-size="12">hard</text>
+  <rect x="368" y="296" width="292" height="36" rx="8" fill="#121215" stroke="#2e2e33"/>
+  <text x="380" y="307" fill="#6b6b76" font-size="9" font-weight="600" letter-spacing="0.5">PROJECT</text>
+  <text x="380" y="323" fill="#6b6b76" font-size="12"></text>
 
-  <rect x="212" y="198" width="100" height="32" rx="6" fill="#121215" stroke="#2e2e33"/>
-  <text x="224" y="208" fill="#6b6b76" font-size="9" font-weight="600">DEADLINE</text>
-  <text x="224" y="222" fill="#ededf0" font-size="12">soft</text>
+  <!-- Accept -->
+  <rect x="60" y="344" width="72" height="32" rx="8" fill="#27272b"/>
+  <text x="96" y="360" fill="#ededf0" font-size="12" text-anchor="middle">Accept</text>
 
-  <rect x="326" y="198" width="100" height="32" rx="6" fill="#121215" stroke="#2e2e33"/>
-  <text x="338" y="208" fill="#6b6b76" font-size="9" font-weight="600">DIFFICULTY</text>
-  <text x="338" y="222" fill="#ededf0" font-size="12">hard</text>
+  <!-- === Task 2 — clean, no clarification === -->
+  <line x1="60" y1="392" x2="660" y2="392" stroke="#2e2e33"/>
 
-  <!-- Accept button -->
-  <rect x="60" y="244" width="70" height="28" rx="6" fill="#27272b"/>
-  <text x="95" y="258" fill="#ededf0" font-size="12" text-anchor="middle">Accept</text>
+  <text x="60" y="414" fill="#6b6b76" font-size="12">Concrete code task, well-scoped. Routed to group code.</text>
 
-  <!-- Divider -->
-  <line x1="60" y1="284" x2="660" y2="284" stroke="#2e2e33"/>
+  <!-- Title (full width) -->
+  <rect x="60" y="430" width="600" height="36" rx="8" fill="#121215" stroke="#2e2e33"/>
+  <text x="72" y="441" fill="#6b6b76" font-size="9" font-weight="600" letter-spacing="0.5">TITLE</text>
+  <text x="72" y="457" fill="#ededf0" font-size="12">fix broken test in CI pipeline</text>
 
-  <!-- Task 2 - clean, no clarification -->
-  <text x="60" y="306" fill="#6b6b76" font-size="12">Concrete task, well-scoped. Routing to group code based on mention of shared repo.</text>
+  <!-- Category | Priority -->
+  <rect x="60" y="474" width="292" height="36" rx="8" fill="#121215" stroke="#2e2e33"/>
+  <text x="72" y="485" fill="#6b6b76" font-size="9" font-weight="600" letter-spacing="0.5">CATEGORY</text>
+  <text x="72" y="501" fill="#8b5ecf" font-size="12">group code</text>
+  <rect x="368" y="474" width="292" height="36" rx="8" fill="#121215" stroke="#2e2e33"/>
+  <text x="380" y="485" fill="#6b6b76" font-size="9" font-weight="600" letter-spacing="0.5">DIFFICULTY</text>
+  <text x="380" y="501" fill="#ededf0" font-size="12">medium</text>
 
-  <!-- Fields -->
-  <rect x="60" y="322" width="290" height="32" rx="6" fill="#121215" stroke="#2e2e33"/>
-  <text x="72" y="332" fill="#6b6b76" font-size="9" font-weight="600">TITLE</text>
-  <text x="72" y="346" fill="#ededf0" font-size="12">fix broken test in CI pipeline</text>
-
-  <rect x="364" y="322" width="138" height="32" rx="6" fill="#121215" stroke="#2e2e33"/>
-  <text x="376" y="332" fill="#6b6b76" font-size="9" font-weight="600">CATEGORY</text>
-  <text x="376" y="346" fill="#8b5ecf" font-size="12">group code</text>
-
-  <rect x="516" y="322" width="138" height="32" rx="6" fill="#121215" stroke="#2e2e33"/>
-  <text x="528" y="332" fill="#6b6b76" font-size="9" font-weight="600">DIFFICULTY</text>
-  <text x="528" y="346" fill="#ededf0" font-size="12">medium</text>
-
-  <rect x="60" y="362" width="70" height="28" rx="6" fill="#27272b"/>
-  <text x="95" y="376" fill="#ededf0" font-size="12" text-anchor="middle">Accept</text>
+  <!-- Accept -->
+  <rect x="60" y="522" width="72" height="32" rx="8" fill="#27272b"/>
+  <text x="96" y="538" fill="#ededf0" font-size="12" text-anchor="middle">Accept</text>
 </svg>
