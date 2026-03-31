@@ -18,7 +18,9 @@ Built for researchers and grad students who juggle too many things across too ma
 - Suggests priority, difficulty, and a deadline (hard or soft)
 - Flags vague tasks and asks you to be specific ("which papers? how many?")
 - Spellchecks and normalizes formatting
-- Knows your projects and team — "tarun's manuscript" automatically routes to the right project and category
+- Knows your projects and team — mentions of people automatically route to the right project and category
+
+![AI triage](docs/screenshot-triage.png)
 
 **Plan your day** — hit "Plan my day" and get an ordered checklist. Hard deadlines first, quick wins mixed in for momentum, and suggestions on what to defer if you're overloaded. Posts the plan to Slack so you can glance at it without opening the app.
 
