@@ -12,6 +12,7 @@ import ReviewFlow from "./components/ReviewFlow";
 import CompletionTracker from "./components/CompletionTracker";
 import RecentlyDone from "./components/RecentlyDone";
 import WeeklyPieChart from "./components/WeeklyPieChart";
+import TimeSheet from "./components/TimeSheet";
 import MonthlyCalendar from "./components/MonthlyCalendar";
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
   const [loadingPlan, setLoadingPlan] = useState(false);
   const [loadingReview, setLoadingReview] = useState(false);
   const [hours, setHours] = useState<HoursData | null>(null);
+  const [showTimeSheet, setShowTimeSheet] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const refresh = useCallback(async () => {
@@ -124,12 +126,18 @@ export default function App() {
           <h1 className="text-subtle text-base font-semibold tracking-wide">
             pester
           </h1>
-          {hours && hours.started && (
+          {hours && hours.periods.length > 0 && (
             <div className="text-xs text-muted mt-1">
               {formatHours(hours.today_hours)} today &middot; {formatHours(hours.week_hours)} this week
               {hours.avg_hours_per_week != null && (
                 <> &middot; avg {formatHours(hours.avg_hours_per_week)}/wk</>
               )}
+              <button
+                onClick={() => setShowTimeSheet(true)}
+                className="ml-2 text-muted hover:text-text transition-colors"
+              >
+                {hours.clocked_in ? "⏱" : "⏱ clocked out"}
+              </button>
             </div>
           )}
         </div>
@@ -153,7 +161,7 @@ export default function App() {
             disabled={loadingReview}
             className="text-sm px-4 py-2 bg-surface border border-border text-text rounded-lg hover:bg-surface-hover transition-colors disabled:opacity-50"
           >
-            {loadingReview ? "Running..." : "Wrap up"}
+            {loadingReview ? "Running..." : "Review"}
           </button>
         </div>
       </div>
@@ -244,6 +252,15 @@ export default function App() {
 
       <WeeklyPieChart refreshKey={refreshKey} />
       <CompletionTracker refreshKey={refreshKey} />
+
+      {showTimeSheet && hours && (
+        <TimeSheet
+          periods={hours.periods}
+          clockedIn={hours.clocked_in}
+          onUpdate={() => { refresh(); }}
+          onClose={() => setShowTimeSheet(false)}
+        />
+      )}
     </div>
   );
 }

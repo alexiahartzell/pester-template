@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from backend.db import get_db
 from backend.models import Task, TaskResponse, TaskStatus
 from backend.services.ai_planner import plan_day, process_inbox, generate_review
-from backend.services.scheduler import _mark_sent, record_end, get_today_hours
+from backend.services.scheduler import _mark_sent, get_today_hours, clock_out as do_clock_out, clock_in as do_clock_in, update_periods
 from backend.services.slack import post_message, format_plan_message, format_review_message
 
 router = APIRouter(tags=["ai"])
@@ -127,17 +127,33 @@ def run_review(db: Session = Depends(get_db)):
     except json.JSONDecodeError:
         review_data = {"summary": raw, "completed": [], "uncompleted": []}
 
-    # Record work end time and compute hours
-    hours_data = record_end()
-
     # Post to Slack
-    hours_msg = ""
-    if hours_data.get("hours"):
-        hours_msg = f"\n*Hours worked:* {hours_data['hours']}h"
-    post_message(format_review_message(review_data) + hours_msg)
+    post_message(format_review_message(review_data))
     _mark_sent("review")
 
-    return {**review_data, "hours": hours_data}
+    return review_data
+
+
+@router.post("/clock-out")
+def api_clock_out():
+    data = do_clock_out()
+    if data.get("today_hours"):
+        post_message(f"Clocked out. *Hours today:* {data['today_hours']}h")
+    return data
+
+
+@router.post("/clock-in")
+def api_clock_in():
+    return do_clock_in()
+
+
+class PeriodsUpdate(BaseModel):
+    periods: list
+
+
+@router.put("/hours/periods")
+def api_update_periods(body: PeriodsUpdate):
+    return update_periods(body.periods)
 
 
 @router.get("/hours/today")
