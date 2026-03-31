@@ -19,19 +19,19 @@
 
   <rect x="210" y="80" width="10" height="10" rx="2" fill="#5eaaee"/>
   <text x="226" y="85" fill="#5eaaee" font-size="11">my research</text>
-  <text x="320" y="85" fill="#6b6b76" font-size="11">5</text>
+  <text x="320" y="85" fill="#6b6b76" font-size="11">5 (31%)</text>
   <rect x="210" y="100" width="10" height="10" rx="2" fill="#8b5ecf"/>
   <text x="226" y="105" fill="#8b5ecf" font-size="11">group code</text>
-  <text x="320" y="105" fill="#6b6b76" font-size="11">4</text>
+  <text x="320" y="105" fill="#6b6b76" font-size="11">4 (25%)</text>
   <rect x="210" y="120" width="10" height="10" rx="2" fill="#ffcc44"/>
   <text x="226" y="125" fill="#ffcc44" font-size="11">my admin</text>
-  <text x="320" y="125" fill="#6b6b76" font-size="11">3</text>
+  <text x="320" y="125" fill="#6b6b76" font-size="11">3 (19%)</text>
   <rect x="210" y="140" width="10" height="10" rx="2" fill="#ee8855"/>
   <text x="226" y="145" fill="#ee8855" font-size="11">my meetings</text>
-  <text x="320" y="145" fill="#6b6b76" font-size="11">2</text>
+  <text x="320" y="145" fill="#6b6b76" font-size="11">2 (13%)</text>
   <rect x="210" y="160" width="10" height="10" rx="2" fill="#5ee8c0"/>
   <text x="226" y="165" fill="#5ee8c0" font-size="11">coursework</text>
-  <text x="320" y="165" fill="#6b6b76" font-size="11">2</text>
+  <text x="320" y="165" fill="#6b6b76" font-size="11">2 (12%)</text>
 
   <!-- === Completion card === -->
   <rect x="370" y="20" width="310" height="200" rx="12" fill="#1e1e22"/>

@@ -25,8 +25,9 @@
   <!-- Section label -->
   <text x="40" y="152" fill="#b0b0c0" font-size="11" font-weight="600" letter-spacing="1">TODAY</text>
 
-  <!-- Task 1 - high priority, my research -->
+  <!-- Task 1: high priority, hard, my research -->
   <rect x="48" y="166" width="632" height="48" rx="10" fill="#1e1e22"/>
+  <!-- Priority strip: high = diagonal lines -->
   <rect x="40" y="166" width="8" height="48" rx="4" fill="#444"/>
   <line x1="42" y1="172" x2="46" y2="166" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
   <line x1="42" y1="179" x2="48" y2="169" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
@@ -35,14 +36,18 @@
   <line x1="42" y1="200" x2="48" y2="190" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
   <line x1="42" y1="207" x2="48" y2="197" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
   <line x1="44" y1="214" x2="48" y2="204" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+  <!-- Checkbox -->
   <circle cx="72" cy="190" r="8" fill="none" stroke="#6b6b76" stroke-width="1.5"/>
-  <circle cx="558" cy="190" r="3" fill="#8888a0"/>
-  <circle cx="568" cy="190" r="3" fill="#8888a0"/>
-  <circle cx="578" cy="190" r="3" fill="#8888a0"/>
+  <!-- Title -->
   <text x="92" y="190" fill="#ededf0" font-size="14">finish draft of methods section</text>
-  <text x="598" y="190" fill="#5eaaee" font-size="11">my research</text>
+  <!-- Right side: difficulty, category, type label — in order -->
+  <circle cx="530" cy="190" r="3" fill="#8888a0"/>
+  <circle cx="540" cy="190" r="3" fill="#8888a0"/>
+  <circle cx="550" cy="190" r="3" fill="#8888a0"/>
+  <text x="565" y="190" fill="#5eaaee" font-size="11">my research</text>
+  <text x="645" y="190" fill="#ff6b6b" font-size="11">overdue</text>
 
-  <!-- Task 2 - high priority, group code -->
+  <!-- Task 2: high priority, group code -->
   <rect x="48" y="220" width="632" height="48" rx="10" fill="#1e1e22"/>
   <rect x="40" y="220" width="8" height="48" rx="4" fill="#444"/>
   <line x1="42" y1="226" x2="46" y2="220" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
@@ -52,32 +57,35 @@
   <line x1="42" y1="254" x2="48" y2="244" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
   <line x1="42" y1="261" x2="48" y2="251" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
   <circle cx="72" cy="244" r="8" fill="none" stroke="#6b6b76" stroke-width="1.5"/>
-  <circle cx="558" cy="244" r="3" fill="#8888a0"/>
-  <circle cx="568" cy="244" r="3" fill="#8888a0"/>
-  <circle cx="578" cy="244" r="3" fill="#2e2e33"/>
   <text x="92" y="244" fill="#ededf0" font-size="14">review pull request for data pipeline</text>
-  <text x="598" y="244" fill="#8b5ecf" font-size="11">group code</text>
+  <circle cx="530" cy="244" r="3" fill="#8888a0"/>
+  <circle cx="540" cy="244" r="3" fill="#8888a0"/>
+  <circle cx="550" cy="244" r="3" fill="#2e2e33"/>
+  <text x="565" y="244" fill="#8b5ecf" font-size="11">group code</text>
 
-  <!-- Task 3 - medium, meeting with time -->
+  <!-- Task 3: medium priority, meeting with time + recurrence -->
   <rect x="48" y="274" width="632" height="48" rx="10" fill="#1e1e22"/>
+  <!-- Priority strip: medium = vertical dashes -->
   <rect x="40" y="274" width="8" height="48" rx="4" fill="#2a2a2e"/>
-  <line x1="42" y1="276" x2="42" y2="280" stroke="#888" stroke-width="1.5"/>
-  <line x1="42" y1="285" x2="42" y2="289" stroke="#888" stroke-width="1.5"/>
-  <line x1="42" y1="294" x2="42" y2="298" stroke="#888" stroke-width="1.5"/>
-  <line x1="42" y1="303" x2="42" y2="307" stroke="#888" stroke-width="1.5"/>
-  <line x1="42" y1="312" x2="42" y2="316" stroke="#888" stroke-width="1.5"/>
+  <line x1="44" y1="278" x2="44" y2="283" stroke="#888" stroke-width="2"/>
+  <line x1="44" y1="288" x2="44" y2="293" stroke="#888" stroke-width="2"/>
+  <line x1="44" y1="298" x2="44" y2="303" stroke="#888" stroke-width="2"/>
+  <line x1="44" y1="308" x2="44" y2="313" stroke="#888" stroke-width="2"/>
   <circle cx="72" cy="298" r="8" fill="none" stroke="#6b6b76" stroke-width="1.5"/>
-  <circle cx="510" cy="298" r="3" fill="#8888a0"/>
-  <circle cx="520" cy="298" r="3" fill="#2e2e33"/>
-  <circle cx="530" cy="298" r="3" fill="#2e2e33"/>
   <text x="92" y="298" fill="#ededf0" font-size="14">advisor check-in</text>
-  <text x="545" y="292" fill="#6b6b76" font-size="11">2pm–3pm</text>
-  <text x="545" y="308" fill="#ee8855" font-size="11">my meetings</text>
-  <text x="618" y="298" fill="#6b6b76" font-size="11">↻</text>
+  <!-- Right side: difficulty, time, recurrence, category -->
+  <circle cx="460" cy="298" r="3" fill="#8888a0"/>
+  <circle cx="470" cy="298" r="3" fill="#2e2e33"/>
+  <circle cx="480" cy="298" r="3" fill="#2e2e33"/>
+  <text x="494" y="298" fill="#6b6b76" font-size="11">2pm–3pm</text>
+  <text x="555" y="298" fill="#6b6b76" font-size="11">↻</text>
+  <text x="572" y="298" fill="#ee8855" font-size="11">my meetings</text>
 
-  <!-- Task 4 - low, done -->
+  <!-- Task 4: low priority, done -->
   <rect x="48" y="328" width="632" height="48" rx="10" fill="#1e1e22"/>
+  <!-- Priority strip: low = solid gray -->
   <rect x="40" y="328" width="8" height="48" rx="4" fill="#666"/>
+  <!-- Done checkbox = filled green -->
   <circle cx="72" cy="352" r="8" fill="#5eeaa0" stroke="#5eeaa0" stroke-width="1.5"/>
   <text x="92" y="352" fill="#6b6b76" font-size="14" text-decoration="line-through">submit travel reimbursement</text>
   <text x="598" y="352" fill="#d4a520" font-size="11">my admin</text>
