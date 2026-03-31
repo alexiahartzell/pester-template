@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="420" viewBox="0 0 720 420">
+  <defs>
+    <style>
+      text { font-family: -apple-system, 'Inter', sans-serif; }
+    </style>
+  </defs>
+  <rect width="720" height="420" rx="12" fill="#121215"/>
+
+  <!-- Triage card -->
+  <rect x="40" y="20" width="640" height="380" rx="12" fill="#1e1e22" stroke="#2e2e33"/>
+
+  <!-- Header -->
+  <text x="60" y="50" fill="#ffcc44" font-size="11" font-weight="600" letter-spacing="1">SORT NEW TASKS</text>
+  <text x="60" y="70" fill="#6b6b76" font-size="13">Review and adjust each task, then accept.</text>
+
+  <!-- Task 1 - with clarification -->
+  <line x1="60" y1="88" x2="660" y2="88" stroke="#2e2e33"/>
+
+  <text x="60" y="112" fill="#6b6b76" font-size="12" text-decoration="line-through">Work on the AAA stuff</text>
+  <text x="60" y="132" fill="#6b6b76" font-size="12">BCF decomposition task — needs more detail on scope.</text>
+  <text x="60" y="155" fill="#ff9966" font-size="12">which aspect of the AAA project? specific calculation or analysis step?</text>
+
+  <!-- Editable fields -->
+  <rect x="60" y="168" width="292" height="34" rx="6" fill="#121215" stroke="#2e2e33"/>
+  <text x="72" y="180" fill="#6b6b76" font-size="10" font-weight="500">TITLE</text>
+  <text x="72" y="194" fill="#ededf0" font-size="12">run BCF decomposition for AAA dimer</text>
+
+  <rect x="368" y="168" width="140" height="34" rx="6" fill="#121215" stroke="#2e2e33"/>
+  <text x="380" y="180" fill="#6b6b76" font-size="10" font-weight="500">CATEGORY</text>
+  <text x="380" y="194" fill="#5eaaee" font-size="12">my research</text>
+
+  <rect x="524" y="168" width="136" height="34" rx="6" fill="#121215" stroke="#2e2e33"/>
+  <text x="536" y="180" fill="#6b6b76" font-size="10" font-weight="500">PRIORITY</text>
+  <text x="536" y="194" fill="#ededf0" font-size="12">high</text>
+
+  <rect x="60" y="210" width="140" height="34" rx="6" fill="#121215" stroke="#2e2e33"/>
+  <text x="72" y="222" fill="#6b6b76" font-size="10" font-weight="500">DUE</text>
+  <text x="72" y="236" fill="#ededf0" font-size="12">2026-04-02</text>
+
+  <rect x="216" y="210" width="100" height="34" rx="6" fill="#121215" stroke="#2e2e33"/>
+  <text x="228" y="222" fill="#6b6b76" font-size="10" font-weight="500">DEADLINE</text>
+  <text x="228" y="236" fill="#ededf0" font-size="12">soft</text>
+
+  <rect x="332" y="210" width="100" height="34" rx="6" fill="#121215" stroke="#2e2e33"/>
+  <text x="344" y="222" fill="#6b6b76" font-size="10" font-weight="500">DIFFICULTY</text>
+  <text x="344" y="236" fill="#ededf0" font-size="12">medium</text>
+
+  <!-- Accept button -->
+  <rect x="60" y="256" width="70" height="30" rx="6" fill="#27272b"/>
+  <text x="76" y="276" fill="#ededf0" font-size="12">Accept</text>
+
+  <!-- Task 2 - clean, no clarification needed -->
+  <line x1="60" y1="300" x2="660" y2="300" stroke="#2e2e33"/>
+
+  <text x="60" y="326" fill="#6b6b76" font-size="12">Concrete review task, well-scoped for 1-2 hours.</text>
+
+  <rect x="60" y="340" width="292" height="34" rx="6" fill="#121215" stroke="#2e2e33"/>
+  <text x="72" y="352" fill="#6b6b76" font-size="10" font-weight="500">TITLE</text>
+  <text x="72" y="366" fill="#ededf0" font-size="12">review jacob's charge separation script</text>
+
+  <rect x="368" y="340" width="140" height="34" rx="6" fill="#121215" stroke="#2e2e33"/>
+  <text x="380" y="352" fill="#6b6b76" font-size="10" font-weight="500">CATEGORY</text>
+  <text x="380" y="366" fill="#8b5ecf" font-size="12">group code</text>
+
+  <rect x="524" y="340" width="136" height="34" rx="6" fill="#121215" stroke="#2e2e33"/>
+  <text x="536" y="352" fill="#6b6b76" font-size="10" font-weight="500">DIFFICULTY</text>
+  <text x="536" y="366" fill="#ededf0" font-size="12">medium</text>
+
+  <rect x="60" y="382" width="70" height="30" rx="6" fill="#27272b"/>
+  <text x="76" y="402" fill="#ededf0" font-size="12">Accept</text>
+</svg>
