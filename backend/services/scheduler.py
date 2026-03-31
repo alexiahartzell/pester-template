@@ -79,7 +79,12 @@ def overdue_check():
 
 # --- Hours tracking ---
 
-HOURS_START_DATE = date(2026, 3, 22)  # Start tracking Sunday 2026-03-22
+def _get_hours_start_date() -> date:
+    from backend.config import get_config_value
+    val = get_config_value("hours_start_date")
+    if val:
+        return date.fromisoformat(str(val))
+    return date.today()
 
 
 def _close_out_previous_day():
@@ -103,7 +108,7 @@ def _close_out_previous_day():
 def record_start():
     """Record the server start time as the day's work start."""
     today = date.today()
-    if today < HOURS_START_DATE:
+    if today < _get_hours_start_date():
         return
     data = _load_hours()
     if data.get("date") != today.isoformat():
@@ -117,7 +122,7 @@ def record_start():
 def record_end():
     """Record review time as the day's work end and compute hours."""
     today = date.today()
-    if today < HOURS_START_DATE:
+    if today < _get_hours_start_date():
         return {"date": today.isoformat(), "hours": None}
     data = _load_hours()
     now = datetime.now()
@@ -150,7 +155,7 @@ def _load_hours_log() -> list:
 def get_today_hours() -> dict:
     from datetime import timedelta
     today = date.today()
-    if today < HOURS_START_DATE:
+    if today < _get_hours_start_date():
         return {"date": today.isoformat(), "today_hours": 0, "week_hours": 0, "avg_hours_per_week": None, "started": False, "reviewed": False}
     data = _load_hours()
 

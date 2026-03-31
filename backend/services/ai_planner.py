@@ -1,9 +1,12 @@
+import shutil
 import subprocess
 from datetime import date
 
 from backend.models import TaskResponse
 
-CLAUDE_CMD = "/Users/alexia/.local/bin/claude"
+CLAUDE_CMD = shutil.which("claude")
+if not CLAUDE_CMD:
+    raise RuntimeError("Claude Code CLI not found. Install it: https://docs.anthropic.com/en/docs/claude-code")
 
 
 def _chat(system: str, user: str) -> str:
@@ -127,7 +130,9 @@ def plan_day(active_tasks: list[TaskResponse], done_today_count: int) -> str:
             "- Mix in 1-2 quick wins early for momentum if the day is heavy.\n"
             "- Flag if there are too many tasks and suggest what to defer.\n"
             "- Respond with a JSON object: {plan: [{id, title, reason}], deferred: [{id, title, reason}], note: string|null}. "
-            "The plan array is the ordered checklist. Only return JSON."
+            "The plan array is the ordered checklist. "
+            "IMPORTANT: In the 'reason' and 'note' fields, always refer to tasks by their title, NEVER by ID number. "
+            "The user cannot see task IDs. Only return JSON."
         ),
         user=f"Today is {today}. Tasks done today: {done_today_count}. Active tasks:\n{task_text}",
     )
@@ -156,6 +161,7 @@ def generate_review(planned_tasks: list, all_tasks: list[TaskResponse]) -> str:
             "For each planned task, note if it was completed or not. "
             "For uncompleted tasks, suggest: move to tomorrow, drop, or reschedule. "
             "Respond with JSON: {completed: [{id, title}], uncompleted: [{id, title, suggestion, reason}], summary: string}. "
+            "In the 'summary' and 'reason' fields, always refer to tasks by title, NEVER by ID number. "
             "Only return JSON."
         ),
         user=(

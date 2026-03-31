@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-PLIST_NAME="com.alexia.pester.plist"
+USERNAME="$(whoami)"
+PLIST_NAME="com.${USERNAME}.pester.plist"
 AGENTS_DIR="$HOME/Library/LaunchAgents"
 
 echo "Stopping pester..."
