@@ -6,7 +6,7 @@ Pester doesn't just store a list — it thinks about your day. Capture tasks as 
 
 Built for researchers and grad students who juggle too many things across too many projects.
 
-![Main view](docs/mockup-main-v3.svg)
+![Main view](docs/mockup-main-v4.svg)
 
 ## What it does
 
@@ -14,7 +14,7 @@ Built for researchers and grad students who juggle too many things across too ma
 
 **AI sorts your mess** — hit "Process new" and the AI reads your inbox, then for each task:
 
-![AI triage](docs/mockup-triage-v3.svg)
+![AI triage](docs/mockup-triage-v4.svg)
 - Assigns a category (your research, group code, meetings, admin, etc.)
 - Suggests priority, difficulty, and a deadline (hard or soft)
 - Flags vague tasks and asks you to be specific ("which papers? how many?")
@@ -23,7 +23,7 @@ Built for researchers and grad students who juggle too many things across too ma
 
 **Plan your day** — hit "Plan my day" and get an ordered checklist. Hard deadlines first, quick wins mixed in for momentum, and suggestions on what to defer if you're overloaded. Posts the plan to Slack so you can glance at it without opening the app.
 
-![Analytics](docs/mockup-analytics-v3.svg)
+![Analytics](docs/mockup-analytics-v4.svg)
 
 **Track everything** — hours worked (auto-starts when your computer boots, ends when you wrap up), completion rates per category over time, weekly task distribution pie chart, and a monthly calendar view.
 
