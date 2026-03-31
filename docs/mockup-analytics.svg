@@ -10,11 +10,12 @@
   <rect x="40" y="20" width="310" height="200" rx="12" fill="#1e1e22"/>
   <text x="60" y="46" fill="#b0b0c0" font-size="11" font-weight="600" letter-spacing="1">THIS WEEK BY CATEGORY</text>
 
-  <circle cx="130" cy="130" r="55" fill="none" stroke="#5eaaee" stroke-width="12" stroke-dasharray="86 260" stroke-dashoffset="0"/>
-  <circle cx="130" cy="130" r="55" fill="none" stroke="#8b5ecf" stroke-width="12" stroke-dasharray="60 260" stroke-dashoffset="-86"/>
-  <circle cx="130" cy="130" r="55" fill="none" stroke="#ffcc44" stroke-width="12" stroke-dasharray="52 260" stroke-dashoffset="-146"/>
-  <circle cx="130" cy="130" r="55" fill="none" stroke="#ee8855" stroke-width="12" stroke-dasharray="35 260" stroke-dashoffset="-198"/>
-  <circle cx="130" cy="130" r="55" fill="none" stroke="#5ee8c0" stroke-width="12" stroke-dasharray="27 260" stroke-dashoffset="-233"/>
+  <!-- circumference = 2*pi*55 = 345.6; segments: 31%=107, 25%=86, 19%=66, 13%=45, 12%=42 -->
+  <circle cx="130" cy="130" r="55" fill="none" stroke="#5eaaee" stroke-width="12" stroke-dasharray="107 346" stroke-dashoffset="86" transform="rotate(-90 130 130)"/>
+  <circle cx="130" cy="130" r="55" fill="none" stroke="#8b5ecf" stroke-width="12" stroke-dasharray="86 346" stroke-dashoffset="-21" transform="rotate(-90 130 130)"/>
+  <circle cx="130" cy="130" r="55" fill="none" stroke="#ffcc44" stroke-width="12" stroke-dasharray="66 346" stroke-dashoffset="-107" transform="rotate(-90 130 130)"/>
+  <circle cx="130" cy="130" r="55" fill="none" stroke="#ee8855" stroke-width="12" stroke-dasharray="45 346" stroke-dashoffset="-173" transform="rotate(-90 130 130)"/>
+  <circle cx="130" cy="130" r="55" fill="none" stroke="#5ee8c0" stroke-width="12" stroke-dasharray="42 346" stroke-dashoffset="-218" transform="rotate(-90 130 130)"/>
 
   <rect x="210" y="80" width="10" height="10" rx="2" fill="#5eaaee"/>
   <text x="226" y="85" fill="#5eaaee" font-size="11">my research</text>
