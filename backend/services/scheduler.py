@@ -88,60 +88,103 @@ def _get_hours_start_date() -> date:
 
 
 def _close_out_previous_day():
-    """If there's an open day (started but not ended), close it and log it."""
+    """If there's an open period from a previous day, close it and log."""
     data = _load_hours()
     today = date.today().isoformat()
-    if data.get("date") and data["date"] != today and data.get("start") and not data.get("hours"):
-        # Previous day was never wrapped up — estimate end as last known activity
-        # Use 11:59pm of that day as the end cap, but more realistically
-        # the user stopped when they stopped using the app. Use a conservative
-        # 8 hours from start as a cap, or end of that day, whichever is earlier.
-        start = datetime.fromisoformat(data["start"])
-        end_of_day = datetime.fromisoformat(data["date"] + "T23:59:59")
-        capped_end = min(start + timedelta(hours=10), end_of_day)
-        data["end"] = capped_end.isoformat()
-        data["hours"] = round((capped_end - start).total_seconds() / 3600, 1)
-        _save_hours(data)
-        _log_day(data)
+    if not data.get("date") or data["date"] == today:
+        return
+    periods = data.get("periods", [])
+    # Close any open period
+    for p in periods:
+        if not p.get("end"):
+            # Cap at end of that day
+            end_of_day = data["date"] + "T23:59:59"
+            p["end"] = end_of_day
+    data["periods"] = periods
+    _save_hours(data)
+    _log_day(data)
+
+
+def _calc_total(periods: list) -> float:
+    """Sum hours across all periods."""
+    total = 0.0
+    for p in periods:
+        if not p.get("start"):
+            continue
+        start = datetime.fromisoformat(p["start"])
+        end = datetime.fromisoformat(p["end"]) if p.get("end") else datetime.now()
+        total += (end - start).total_seconds() / 3600
+    return round(total, 1)
 
 
 def record_start():
-    """Record the server start time as the day's work start."""
+    """Auto-called on boot. Starts a new period for today."""
     today = date.today()
     if today < _get_hours_start_date():
         return
     data = _load_hours()
     if data.get("date") != today.isoformat():
         _close_out_previous_day()
-        data = {"date": today.isoformat(), "start": datetime.now().isoformat(), "end": None, "hours": None}
-    elif not data.get("start"):
-        data["start"] = datetime.now().isoformat()
+        data = {"date": today.isoformat(), "periods": [{"start": datetime.now().isoformat(), "end": None}]}
+    else:
+        periods = data.get("periods", [])
+        # Only add a new period if there isn't an open one
+        if not periods or periods[-1].get("end"):
+            periods.append({"start": datetime.now().isoformat(), "end": None})
+            data["periods"] = periods
     _save_hours(data)
 
 
-def record_end():
-    """Record review time as the day's work end and compute hours."""
+def clock_out():
+    """Close the current open period."""
     today = date.today()
     if today < _get_hours_start_date():
-        return {"date": today.isoformat(), "hours": None}
+        return get_today_hours()
     data = _load_hours()
-    now = datetime.now()
-    data["end"] = now.isoformat()
-    if data.get("date") == today.isoformat() and data.get("start"):
-        start = datetime.fromisoformat(data["start"])
-        delta = now - start
-        data["hours"] = round(delta.total_seconds() / 3600, 1)
+    if data.get("date") != today.isoformat():
+        return get_today_hours()
+    periods = data.get("periods", [])
+    if periods and not periods[-1].get("end"):
+        periods[-1]["end"] = datetime.now().isoformat()
+    data["periods"] = periods
     _save_hours(data)
     _log_day(data)
-    return data
+    return get_today_hours()
+
+
+def clock_in():
+    """Start a new period (after clocking out)."""
+    today = date.today()
+    if today < _get_hours_start_date():
+        return get_today_hours()
+    data = _load_hours()
+    if data.get("date") != today.isoformat():
+        data = {"date": today.isoformat(), "periods": []}
+    periods = data.get("periods", [])
+    # Only if last period is closed
+    if not periods or periods[-1].get("end"):
+        periods.append({"start": datetime.now().isoformat(), "end": None})
+    data["periods"] = periods
+    _save_hours(data)
+    return get_today_hours()
+
+
+def update_periods(periods: list) -> dict:
+    """Replace today's periods with manually edited ones."""
+    today = date.today()
+    data = {"date": today.isoformat(), "periods": periods}
+    _save_hours(data)
+    _log_day(data)
+    return get_today_hours()
 
 
 def _log_day(data: dict):
-    """Append today's hours to the persistent log."""
+    """Log today's total hours."""
     log = _load_hours_log()
-    # Replace existing entry for same date
+    periods = data.get("periods", [])
+    total = _calc_total(periods)
     log = [e for e in log if e.get("date") != data.get("date")]
-    log.append({"date": data["date"], "hours": data.get("hours", 0), "start": data.get("start"), "end": data.get("end")})
+    log.append({"date": data["date"], "hours": total})
     _HOURS_LOG_PATH.write_text(json.dumps(log))
 
 
@@ -153,17 +196,15 @@ def _load_hours_log() -> list:
 
 
 def get_today_hours() -> dict:
-    from datetime import timedelta
     today = date.today()
     if today < _get_hours_start_date():
-        return {"date": today.isoformat(), "today_hours": 0, "week_hours": 0, "avg_hours_per_week": None, "started": False, "reviewed": False}
+        return {"date": today.isoformat(), "today_hours": 0, "week_hours": 0,
+                "avg_hours_per_week": None, "clocked_in": False, "periods": []}
     data = _load_hours()
 
-    today_hours = 0.0
-    if data.get("date") == today.isoformat() and data.get("start"):
-        start = datetime.fromisoformat(data["start"])
-        end = datetime.fromisoformat(data["end"]) if data.get("end") else datetime.now()
-        today_hours = round((end - start).total_seconds() / 3600, 1)
+    periods = data.get("periods", []) if data.get("date") == today.isoformat() else []
+    today_hours = _calc_total(periods)
+    clocked_in = bool(periods and not periods[-1].get("end"))
 
     # Weekly total (Sun-Sat)
     week_start = today - timedelta(days=(today.weekday() + 1) % 7)
@@ -173,10 +214,9 @@ def get_today_hours() -> dict:
         for e in log
         if e.get("date") and e["date"] >= week_start.isoformat() and e["date"] < today.isoformat()
     )
-    # Add today
     week_hours = round(week_hours + today_hours, 1)
 
-    # Monthly avg (last 4 weeks, Sun-Sat)
+    # Monthly avg (last 4 weeks)
     four_weeks_ago = today - timedelta(weeks=4)
     weekly_totals: dict[str, float] = {}
     for e in log:
@@ -187,10 +227,8 @@ def get_today_hours() -> dict:
             continue
         ws = (d - timedelta(days=(d.weekday() + 1) % 7)).isoformat()
         weekly_totals[ws] = weekly_totals.get(ws, 0) + (e["hours"] or 0)
-    # Add current week (including today)
     current_ws = week_start.isoformat()
     weekly_totals[current_ws] = week_hours
-
     completed_weeks = [h for ws, h in weekly_totals.items() if ws != current_ws]
     avg_hours_per_week = round(sum(completed_weeks) / len(completed_weeks), 1) if completed_weeks else None
 
@@ -199,8 +237,8 @@ def get_today_hours() -> dict:
         "today_hours": today_hours,
         "week_hours": week_hours,
         "avg_hours_per_week": avg_hours_per_week,
-        "started": bool(data.get("start") and data.get("date") == today.isoformat()),
-        "reviewed": bool(data.get("end") and data.get("date") == today.isoformat()),
+        "clocked_in": clocked_in,
+        "periods": periods,
     }
 
 

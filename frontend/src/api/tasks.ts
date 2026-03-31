@@ -96,13 +96,18 @@ export const tasks = {
     }),
 };
 
+export interface Period {
+  start: string;
+  end: string | null;
+}
+
 export interface HoursData {
   date: string;
   today_hours: number;
   week_hours: number;
   avg_hours_per_week: number | null;
-  started: boolean;
-  reviewed: boolean;
+  clocked_in: boolean;
+  periods: Period[];
 }
 
 export const ai = {
@@ -111,4 +116,11 @@ export const ai = {
   review: () => apiFetch<any>("/review", { method: "POST" }),
   todayPlan: () => apiFetch<DayPlan>("/plan/today"),
   hours: () => apiFetch<HoursData>("/hours/today"),
+  clockOut: () => apiFetch<HoursData>("/clock-out", { method: "POST" }),
+  clockIn: () => apiFetch<HoursData>("/clock-in", { method: "POST" }),
+  updatePeriods: (periods: Period[]) =>
+    apiFetch<HoursData>("/hours/periods", {
+      method: "PUT",
+      body: JSON.stringify({ periods }),
+    }),
 };
