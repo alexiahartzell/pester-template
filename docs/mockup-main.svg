@@ -8,7 +8,7 @@
 
   <!-- Header -->
   <text x="40" y="38" fill="#b0b0c0" font-size="14" font-weight="600" letter-spacing="1">pester</text>
-  <text x="40" y="58" fill="#6b6b76" font-size="11">5h 40m today · 28h 15m this week · avg 32h/wk</text>
+  <text x="40" y="58" fill="#6b6b76" font-size="11">6h 10m today · 38h 45m this week · avg 44h/wk</text>
 
   <!-- Buttons -->
   <rect x="420" y="24" width="90" height="30" rx="6" fill="#1e1e22" stroke="#2e2e33"/>
